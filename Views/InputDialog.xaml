@@ -1,0 +1,25 @@
+﻿<Window x:Class="BankStatementViewer.Views.InputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="افزودن پیش‌فرض جستجو" Height="240" Width="430"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="12"
+        xml:lang="fa-IR">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="نام پیش‌فرض" VerticalAlignment="Center" Margin="0,0,0,4" />
+        <TextBox x:Name="NameTextBox" Grid.Row="1" Margin="0,0,0,8" />
+        <TextBlock Grid.Row="2" Text="عبارت مورد جستجو در توضیحات" Margin="0,0,0,4" />
+        <TextBox x:Name="SearchTextBox" Grid.Row="3" VerticalAlignment="Top" />
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,12,0,0">
+            <Button Content="ذخیره" IsDefault="True" Click="Accept_Click" MinWidth="90" />
+            <Button Content="انصراف" IsCancel="True" MinWidth="90" />
+        </StackPanel>
+    </Grid>
+</Window>

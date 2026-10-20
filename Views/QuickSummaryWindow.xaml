@@ -1,0 +1,60 @@
+﻿<Window x:Class="BankStatementViewer.Views.QuickSummaryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="خلاصه سریع گردش حساب" Height="760" Width="1100" MinHeight="600" MinWidth="850"
+        WindowStartupLocation="CenterOwner" FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="12"
+        xml:lang="fa-IR">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="190" />
+            <RowDefinition Height="190" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="خلاصه بر اساس تراکنش‌های منطبق با فیلترهای فعلی" FontSize="15" FontWeight="Bold" Margin="0,0,0,8" />
+        <GroupBox Grid.Row="1" Header="جمع‌بندی بر اساس کانال" Margin="0,0,0,8">
+            <DataGrid ItemsSource="{Binding ChannelSummaries}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserSortColumns="True" HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="کانال" Binding="{Binding Channel}" Width="*" />
+                    <DataGridTextColumn Header="تعداد تراکنش" Binding="{Binding Count, StringFormat=N0}" Width="105" />
+                    <DataGridTextColumn Header="تعداد کارمزد" Binding="{Binding FeeCount, StringFormat=N0}" Width="105" />
+                    <DataGridTextColumn Header="مجموع واریز" Binding="{Binding Deposits, StringFormat=N0}" Width="140" />
+                    <DataGridTextColumn Header="مجموع برداشت" Binding="{Binding Withdrawals, StringFormat=N0}" Width="140" />
+                    <DataGridTextColumn Header="کارمزد" Binding="{Binding Fees, StringFormat=N0}" Width="120" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Header="جمع‌بندی بر اساس روز" Margin="0,0,0,8">
+            <DataGrid ItemsSource="{Binding DailySummaries}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserSortColumns="True" HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="تاریخ" Binding="{Binding Date}" Width="*" />
+                    <DataGridTextColumn Header="تعداد تراکنش" Binding="{Binding Count, StringFormat=N0}" Width="115" />
+                    <DataGridTextColumn Header="تعداد کارمزد" Binding="{Binding FeeCount, StringFormat=N0}" Width="115" />
+                    <DataGridTextColumn Header="مجموع واریز" Binding="{Binding Deposits, StringFormat=N0}" Width="150" />
+                    <DataGridTextColumn Header="مجموع برداشت" Binding="{Binding Withdrawals, StringFormat=N0}" Width="150" />
+                    <DataGridTextColumn Header="کارمزد" Binding="{Binding Fees, StringFormat=N0}" Width="130" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+        <GroupBox Grid.Row="3" Header="۲۰ تراکنش بزرگ (بدون ردیف کارمزد)">
+            <DataGrid ItemsSource="{Binding LargeTransactions}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserSortColumns="True" HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ردیف" Binding="{Binding RowNumber}" Width="65" />
+                    <DataGridTextColumn Header="تاریخ" Binding="{Binding Date}" Width="100" />
+                    <DataGridTextColumn Header="زمان" Binding="{Binding Time}" Width="75" />
+                    <DataGridTextColumn Header="نوع" Binding="{Binding TransactionType}" Width="85" />
+                    <DataGridTextColumn Header="کانال" Binding="{Binding Channel}" Width="75" />
+                    <DataGridTextColumn Header="مبلغ" Binding="{Binding Amount, StringFormat=N0}" Width="140" />
+                    <DataGridTextColumn Header="پیگیری" Binding="{Binding Tracking}" Width="90" />
+                    <DataGridTextColumn Header="توضیحات" Binding="{Binding Description}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+        <DockPanel Grid.Row="4" Margin="0,8,0,0" LastChildFill="False">
+            <TextBlock Text="جمع کارمزدها در رکوردهای منطبق: " FontWeight="Bold" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding TotalFees, StringFormat=N0}" FontWeight="Bold" VerticalAlignment="Center" Margin="4,0" />
+            <Button Content="بستن" IsCancel="True" MinWidth="90" Padding="12,5" DockPanel.Dock="Left" />
+        </DockPanel>
+    </Grid>
+</Window>
