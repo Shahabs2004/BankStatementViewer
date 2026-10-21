@@ -7,6 +7,26 @@
         FlowDirection="RightToLeft" FontFamily="{Binding FontFamilyName}" FontSize="12"
         Loaded="MainWindow_Loaded"
         xml:lang="fa-IR">
+    <Window.Resources>
+        <!-- Filter panels stay white when inactive and become pale green when their filter is active. -->
+        <Style x:Key="FilterGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#D5DDE3" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True" />
+                        <Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="#E8F5E9" />
+                    <Setter Property="BorderBrush" Value="#81C784" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -100,7 +120,7 @@
             </Grid.ColumnDefinitions>
             <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="0,0,7,0">
-                    <GroupBox Header="نوع تراکنش">
+                    <GroupBox Header="نوع تراکنش" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.TypeFilterEnabled}">
                         <StackPanel>
                             <CheckBox Content="فعال‌کردن فیلتر نوع" IsChecked="{Binding Filters.TypeFilterEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
@@ -110,21 +130,21 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="کد شعبه">
+                    <GroupBox Header="کد شعبه" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.BranchFilterEnabled}">
                         <StackPanel>
                             <CheckBox Content="فیلتر کد شعبه فعال باشد" IsChecked="{Binding Filters.BranchFilterEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBox Text="{Binding Filters.BranchCode, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Filters.BranchFilterEnabled}" ToolTip="تطابق دقیق کد شعبه" />
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="شماره پیگیری">
+                    <GroupBox Header="شماره پیگیری" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.TrackingFilterEnabled}">
                         <StackPanel>
                             <CheckBox Content="جستجو در پیگیری و پیگیری واریز" IsChecked="{Binding Filters.TrackingFilterEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBox Text="{Binding Filters.TrackingText, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Filters.TrackingFilterEnabled}" />
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="بازه تاریخ (YYYY/MM/DD)">
+                    <GroupBox Header="بازه تاریخ (YYYY/MM/DD)" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.DateFilterEnabled}">
                         <StackPanel>
                             <CheckBox Content="فیلتر بازه تاریخ فعال باشد" IsChecked="{Binding Filters.DateFilterEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <Grid IsEnabled="{Binding Filters.DateFilterEnabled}">
@@ -135,7 +155,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="شماره ردیف">
+                    <GroupBox Header="شماره ردیف" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.RowNumberFilterEnabled}">
                         <StackPanel>
                             <CheckBox Content="فیلتر بازه ردیف فعال باشد" IsChecked="{Binding Filters.RowNumberFilterEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <Grid IsEnabled="{Binding Filters.RowNumberFilterEnabled}">
@@ -146,7 +166,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="مبلغ واریز" IsEnabled="{Binding CanUseDepositAmountFilter}">
+                    <GroupBox Header="مبلغ واریز" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.DepositAmountFilterEnabled}" IsEnabled="{Binding CanUseDepositAmountFilter}">
                         <StackPanel>
                             <CheckBox Content="فیلتر مبلغ واریز فعال باشد" IsChecked="{Binding Filters.DepositAmountFilterEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Filters.DepositAmountMode, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Filters.DepositAmountFilterEnabled}">
@@ -162,7 +182,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="مبلغ برداشت" IsEnabled="{Binding CanUseWithdrawalAmountFilter}">
+                    <GroupBox Header="مبلغ برداشت" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.WithdrawalAmountFilterEnabled}" IsEnabled="{Binding CanUseWithdrawalAmountFilter}">
                         <StackPanel>
                             <CheckBox Content="فیلتر مبلغ برداشت فعال باشد" IsChecked="{Binding Filters.WithdrawalAmountFilterEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Filters.WithdrawalAmountMode, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Filters.WithdrawalAmountFilterEnabled}">
@@ -178,7 +198,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="جستجوی پیش‌فرض در توضیحات">
+                    <GroupBox Header="جستجوی پیش‌فرض در توضیحات" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.DescriptionFilterEnabled}">
                         <StackPanel>
                             <CheckBox Content="فیلتر توضیحات فعال باشد" IsChecked="{Binding Filters.DescriptionFilterEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <ComboBox x:Name="PresetCombo" ItemsSource="{Binding Presets}" DisplayMemberPath="Name" SelectionChanged="PresetCombo_SelectionChanged" />
@@ -190,7 +210,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="جستجوی متن آزاد در توضیحات">
+                    <GroupBox Header="جستجوی متن آزاد در توضیحات" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.TextSearchEnabled}">
                         <StackPanel>
                             <CheckBox Content="جستجوی متن آزاد فعال باشد" IsChecked="{Binding Filters.TextSearchEnabled, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBox Text="{Binding Filters.TextSearchText, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Filters.TextSearchEnabled}" />

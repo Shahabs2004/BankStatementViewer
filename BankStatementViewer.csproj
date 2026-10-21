@@ -14,14 +14,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <RootNamespace>BankStatementViewer</RootNamespace>
     <AssemblyName>BankStatementViewer</AssemblyName>
-    <StartupObject>BankStatementViewer.App</StartupObject>
-    <ApplicationIcon>005-money.ico</ApplicationIcon>
-    <Copyright>شهاب صادقی-مدیریت بانک کشاورزی استان فارس</Copyright>
-    <PackageProjectUrl>https://github.com/Shahabs2004/BankStatementViewer</PackageProjectUrl>
   </PropertyGroup>
-  <ItemGroup>
-    <Content Include="005-money.ico" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.102.3" />
     <PackageReference Include="ExcelDataReader" Version="3.7.0" />
