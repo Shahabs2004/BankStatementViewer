@@ -21,14 +21,23 @@
             <StackPanel>
                 <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,12">
                     <StackPanel HorizontalAlignment="Center">
-                        <Border Width="124" Height="100" BorderBrush="#9CAFC7" BorderThickness="1.5" CornerRadius="8" Background="#F8FAFC" Padding="8" Margin="0,0,0,12">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock Text="＋" FontSize="30" Foreground="#7890AE" HorizontalAlignment="Center" />
-                                <TextBlock Text="محل درج آرم بانک" Foreground="#526174" FontSize="11" TextAlignment="Center" />
-                            </StackPanel>
+                        <Border Width="124"
+        Height="134"
+        BorderBrush="#9CAFC7"
+        BorderThickness="1.5"
+        CornerRadius="8"
+        Background="#F8FAFC"
+        Padding="8"
+        Margin="0,0,0,12">
+
+                            <Image x:Name="Logo"
+           Source="pack://application:,,,/Agri-bank_logo.png"
+           Stretch="Uniform"
+           HorizontalAlignment="Center"
+           VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="BankStatementViewer" FontSize="23" FontWeight="Bold" Foreground="#172B4D" />
-                        <TextBlock Text="تحلیل و مشاهدهٔ صورت‌حساب‌های بانکی" Foreground="#526174" Margin="0,5,0,8" />
+                        <TextBlock Text="Bank Statement Viewer" FontSize="23" FontWeight="Bold" Foreground="#172B4D" HorizontalAlignment="Center" />
+                        <TextBlock Text="نرم افزار بررسی و فیلتر و کنترل صورت حساب های بانک کشاورزی" Foreground="#526174" Margin="0,5,0,8" />
                         <TextBlock x:Name="VersionText" Text="نسخه: —" Foreground="#2457A7" FontWeight="SemiBold" />
                     </StackPanel>
                 </Border>
@@ -36,7 +45,7 @@
                 <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
                     <StackPanel>
                         <TextBlock Text="دربارهٔ نرم‌افزار" FontSize="16" FontWeight="Bold" Foreground="#172B4D" Margin="0,0,0,7" />
-                        <TextBlock Text="ابزاری برای مشاهده، جستجو، فیلتر و تحلیل صورت‌حساب‌های بانکی و تهیهٔ خروجی Excel و چاپ، با پشتیبانی از متن فارسی و انگلیسی." TextWrapping="Wrap" Foreground="#334155" />
+                        <TextBlock Text="ابزاری برای مشاهده، جستجو، فیلتر و تحلیل صورت‌حساب‌های بانک کشاورزی و تهیهٔ خروجی Excel و چاپ، با پشتیبانی از متن فارسی و انگلیسی." TextWrapping="Wrap" Foreground="#334155" />
                     </StackPanel>
                 </Border>
 
@@ -52,8 +61,7 @@
                 <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
                     <StackPanel>
                         <TextBlock Text="مجوز و شرایط استفاده" FontSize="16" FontWeight="Bold" Foreground="#172B4D" Margin="0,0,0,5" />
-                        <TextBlock Text="این بخش برای تکمیل متن مجوز توسط توسعه‌دهنده در نظر گرفته شده است." FontSize="11" Foreground="#64748B" Margin="0,0,0,7" />
-                        <TextBox x:Name="LicensePlaceholder" Text="[متن مجوز و شرایط استفاده را اینجا وارد کنید]" MinHeight="76" Padding="8" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Background="#F8FAFC" BorderBrush="#D9E1EC" />
+                        <TextBox x:Name="LicensePlaceholder" Text="[استفاده از این نرم افزار برای مقاصد شخصی کاملا رایگان است.برای استفاده تجاری و کسب درآمد می بایست با سازنده برنامه تماس بگیرید]" MinHeight="76" Padding="8" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Background="#F8FAFC" BorderBrush="#D9E1EC" />
                     </StackPanel>
                 </Border>
 
@@ -64,11 +72,11 @@
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="نام توسعه‌دهنده:" FontWeight="SemiBold" Margin="0,0,10,8" />
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="شهاب صادقی" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="شهاب صادقی-مدیریت بانک کشاورزی استان فارس" Margin="0,0,0,8" />
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="ایمیل:" FontWeight="SemiBold" Margin="0,0,10,8" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="[نشانی ایمیل را وارد کنید]" Foreground="#64748B" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="[sh-sadeghi@agri-bank.com]" Foreground="#64748B" Margin="0,0,0,8" />
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="تلفن / راه تماس:" FontWeight="SemiBold" Margin="0,0,10,0" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="[اطلاعات تماس را وارد کنید]" Foreground="#64748B" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="[071-32921400]" Foreground="#64748B" />
                         </Grid>
                     </StackPanel>
                 </Border>

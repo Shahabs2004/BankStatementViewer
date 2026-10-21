@@ -18,12 +18,18 @@
     <ApplicationIcon>005-money.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Agri-bank_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="005-money.ico" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.102.3" />
     <PackageReference Include="ExcelDataReader" Version="3.7.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Agri-bank_logo.png" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">
