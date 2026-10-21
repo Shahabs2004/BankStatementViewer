@@ -1,0 +1,82 @@
+<Window x:Class="BankStatementViewer.Views.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="دربارهٔ برنامه" Width="680" Height="760" MinWidth="580" MinHeight="650"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="13" Background="#F8FAFC"
+        xml:lang="fa-IR">
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Background="#E9EEF5" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="ⓘ" FontSize="25" Foreground="#2457A7" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <TextBlock Text="دربارهٔ برنامه" FontSize="20" FontWeight="Bold" Foreground="#172B4D" VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,12">
+                    <StackPanel HorizontalAlignment="Center">
+                        <Border Width="124" Height="100" BorderBrush="#9CAFC7" BorderThickness="1.5" CornerRadius="8" Background="#F8FAFC" Padding="8" Margin="0,0,0,12">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="＋" FontSize="30" Foreground="#7890AE" HorizontalAlignment="Center" />
+                                <TextBlock Text="محل درج آرم بانک" Foreground="#526174" FontSize="11" TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Text="BankStatementViewer" FontSize="23" FontWeight="Bold" Foreground="#172B4D" />
+                        <TextBlock Text="تحلیل و مشاهدهٔ صورت‌حساب‌های بانکی" Foreground="#526174" Margin="0,5,0,8" />
+                        <TextBlock x:Name="VersionText" Text="نسخه: —" Foreground="#2457A7" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="دربارهٔ نرم‌افزار" FontSize="16" FontWeight="Bold" Foreground="#172B4D" Margin="0,0,0,7" />
+                        <TextBlock Text="ابزاری برای مشاهده، جستجو، فیلتر و تحلیل صورت‌حساب‌های بانکی و تهیهٔ خروجی Excel و چاپ، با پشتیبانی از متن فارسی و انگلیسی." TextWrapping="Wrap" Foreground="#334155" />
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="پیوندهای رسمی" FontSize="16" FontWeight="Bold" Foreground="#172B4D" Margin="0,0,0,8" />
+                        <Button Content="مخزن پروژه در GitHub" Click="Repository_Click" HorizontalContentAlignment="Right" Padding="10,8" Margin="0,0,0,6" />
+                        <Button Content="دانلود نسخه‌ها و به‌روزرسانی‌ها (Releases)" Click="Releases_Click" HorizontalContentAlignment="Right" Padding="10,8" />
+                        <TextBlock Text="پیوندها در مرورگر پیش‌فرض باز می‌شوند." FontSize="11" Foreground="#64748B" Margin="0,7,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="مجوز و شرایط استفاده" FontSize="16" FontWeight="Bold" Foreground="#172B4D" Margin="0,0,0,5" />
+                        <TextBlock Text="این بخش برای تکمیل متن مجوز توسط توسعه‌دهنده در نظر گرفته شده است." FontSize="11" Foreground="#64748B" Margin="0,0,0,7" />
+                        <TextBox x:Name="LicensePlaceholder" Text="[متن مجوز و شرایط استفاده را اینجا وارد کنید]" MinHeight="76" Padding="8" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Background="#F8FAFC" BorderBrush="#D9E1EC" />
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="اطلاعات توسعه‌دهنده و تماس" FontSize="16" FontWeight="Bold" Foreground="#172B4D" Margin="0,0,0,9" />
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="نام توسعه‌دهنده:" FontWeight="SemiBold" Margin="0,0,10,8" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="شهاب صادقی" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="ایمیل:" FontWeight="SemiBold" Margin="0,0,10,8" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="[نشانی ایمیل را وارد کنید]" Foreground="#64748B" Margin="0,0,0,8" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="تلفن / راه تماس:" FontWeight="SemiBold" Margin="0,0,10,0" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="[اطلاعات تماس را وارد کنید]" Foreground="#64748B" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        <DockPanel Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock Text="© شهاب صادقی" Foreground="#64748B" VerticalAlignment="Center" DockPanel.Dock="Left" />
+            <Button Content="بستن" IsDefault="True" MinWidth="95" Padding="14,7" Click="Close_Click" HorizontalAlignment="Left" />
+        </DockPanel>
+    </Grid>
+</Window>

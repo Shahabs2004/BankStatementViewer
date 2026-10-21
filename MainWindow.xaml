@@ -307,7 +307,7 @@
 
         <DockPanel Grid.Row="3" Margin="0,6,0,0" LastChildFill="True">
             <TextBlock DockPanel.Dock="Right" Text="{Binding SummaryText}" FontWeight="Bold" VerticalAlignment="Center" Margin="4" />
-            <TextBlock DockPanel.Dock="Left" Text="برنامه‌نویس: شهاب صادقی" Foreground="#52616B" VerticalAlignment="Center" Margin="8,4" />
+            <Button DockPanel.Dock="Left" Content="دربارهٔ برنامه..." Click="About_Click" Foreground="#2457A7" Background="Transparent" BorderThickness="0" VerticalAlignment="Center" Margin="8,4" Padding="6,3" Cursor="Hand" />
             <TextBlock Text="{Binding SettingsStatus}" Foreground="#52616B" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="8,4" />
         </DockPanel>
     </Grid>

@@ -29,6 +29,12 @@ public partial class MainWindow : Window
         ApplyGridColumnSettings();
     }
 
+    private void About_Click(object sender, RoutedEventArgs e)
+    {
+        var about = new AboutWindow { Owner = this };
+        about.ShowDialog();
+    }
+
     private void OpenFile_Click(object sender, RoutedEventArgs e) => OpenStatementDialog();
 
     private void OpenStatementDialog()
