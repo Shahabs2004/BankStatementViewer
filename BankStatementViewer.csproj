@@ -14,7 +14,12 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <RootNamespace>BankStatementViewer</RootNamespace>
     <AssemblyName>BankStatementViewer</AssemblyName>
+    <StartupObject>BankStatementViewer.App</StartupObject>
+    <ApplicationIcon>040-payoff.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="040-payoff.ico" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.102.3" />
     <PackageReference Include="ExcelDataReader" Version="3.7.0" />
