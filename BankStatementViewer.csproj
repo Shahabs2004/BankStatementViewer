@@ -16,6 +16,8 @@
     <AssemblyName>BankStatementViewer</AssemblyName>
     <StartupObject>BankStatementViewer.App</StartupObject>
     <ApplicationIcon>005-money.ico</ApplicationIcon>
+    <FileVersion>1.0.4.0</FileVersion>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Agri-bank_logo.png" />

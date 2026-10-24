@@ -4,7 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
-using System.Threading;
 using System.Threading.Tasks;
 using BankStatementViewer.Models;
 
@@ -23,31 +22,28 @@ public sealed class PrintService
 
     static PrintService()
     {
-        // Brushes are created on the UI thread but printing now runs on a dedicated STA thread.
+        // Freeze brushes (Freezable objects) for safe reuse.
+        // FontFamily does not derive from Freezable and cannot be frozen.
         BorderBrush.Freeze();
         HeaderBrush.Freeze();
         AlternateBrush.Freeze();
     }
 
-    /// <summary>Runs WPF document creation and the native printer dialog on a dedicated STA thread.</summary>
+    /// <summary>
+    /// Creates the WPF print document and shows the printer dialog on the calling
+    /// UI thread. WPF visual/document objects have thread affinity and must not be
+    /// created on a worker thread then accessed by the UI/printer infrastructure.
+    /// </summary>
     public Task<bool> PrintAsync(
         StatementHeader header,
         IReadOnlyCollection<StatementTransaction> transactions,
         bool landscape,
         IReadOnlyCollection<string> selectedColumnKeys)
     {
-        var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var headerCopy = header;
-        var transactionCopy = transactions.ToList();
-        var columnCopy = selectedColumnKeys.ToList();
-        var thread = new Thread(() =>
-        {
-            try { completion.TrySetResult(PrintCore(headerCopy, transactionCopy, landscape, columnCopy)); }
-            catch (Exception ex) { completion.TrySetException(ex); }
-        }) { IsBackground = true, Name = "BankStatementViewer.Print" };
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        return completion.Task;
+        // Keep all WPF PrintDialog, FixedDocument, FixedPage, Grid and TextBlock
+        // creation/use on the same dispatcher thread to avoid cross-thread access.
+        var result = PrintCore(header, transactions.ToList(), landscape, selectedColumnKeys.ToList());
+        return Task.FromResult(result);
     }
 
     private static bool PrintCore(

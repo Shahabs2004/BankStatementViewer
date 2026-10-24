@@ -21,20 +21,8 @@
             <StackPanel>
                 <Border Background="White" BorderBrush="#D9E1EC" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,12">
                     <StackPanel HorizontalAlignment="Center">
-                        <Border Width="124"
-        Height="134"
-        BorderBrush="#9CAFC7"
-        BorderThickness="1.5"
-        CornerRadius="8"
-        Background="#F8FAFC"
-        Padding="8"
-        Margin="0,0,0,12">
-
-                            <Image x:Name="Logo"
-           Source="pack://application:,,,/Agri-bank_logo.png"
-           Stretch="Uniform"
-           HorizontalAlignment="Center"
-           VerticalAlignment="Center"/>
+                        <Border Width="124" Height="134" BorderBrush="#9CAFC7" BorderThickness="1.5" CornerRadius="8" Background="#F8FAFC" Padding="8" Margin="0,0,0,12">
+                            <Image x:Name="Logo" Source="pack://application:,,,/Agri-bank_logo.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Bank Statement Viewer" FontSize="23" FontWeight="Bold" Foreground="#172B4D" HorizontalAlignment="Center" />
                         <TextBlock Text="نرم افزار بررسی و فیلتر و کنترل صورت حساب های بانک کشاورزی" Foreground="#526174" Margin="0,5,0,8" />
