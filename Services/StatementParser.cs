@@ -8,35 +8,39 @@ using BankStatementViewer.Models;
 namespace BankStatementViewer.Services;
 
 /// <summary>
-/// Supports both real Excel workbooks (.xls/.xlsx) and bank-export text files whose extension may be .XLS.
-/// The parser intentionally discovers columns by their headings instead of relying only on fixed positions.
+/// Reads bank statement Excel workbooks (.xls/.xlsx) and discovers columns by their headings.
 /// </summary>
 public sealed class StatementParser
 {
     private const string OleMagic = "D0CF11E0A1B11AE1";
     private const string ZipMagic = "504B0304";
-    private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
     static StatementParser()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
+    public const string InvalidExcelMessage =
+        "فایل انتخاب‌شده باید یک فایل Excel معتبر صادرشده از بانک باشد.";
+
     public StatementData Parse(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentException("مسیر فایل مشخص نشده است.", nameof(filePath));
-        if (!File.Exists(filePath)) throw new FileNotFoundException("فایل انتخاب‌شده پیدا نشد.", filePath);
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentException("مسیر فایل مشخص نشده است.", nameof(filePath));
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("فایل انتخاب‌شده پیدا نشد.", filePath);
 
-        var bytes = File.ReadAllBytes(filePath);
-        if (bytes.Length == 0) throw new InvalidDataException("فایل انتخاب‌شده خالی است.");
+        Span<byte> signatureBytes = stackalloc byte[8];
+        int bytesRead;
+        using (var stream = File.OpenRead(filePath))
+            bytesRead = stream.Read(signatureBytes);
 
-        var signature = Convert.ToHexString(bytes.AsSpan(0, Math.Min(8, bytes.Length)));
-        if (signature.StartsWith(OleMagic, StringComparison.Ordinal) || signature.StartsWith(ZipMagic, StringComparison.Ordinal))
-            return ParseExcel(filePath);
+        var signature = Convert.ToHexString(signatureBytes[..bytesRead]);
+        if (!signature.StartsWith(OleMagic, StringComparison.Ordinal) &&
+            !signature.StartsWith(ZipMagic, StringComparison.Ordinal))
+            throw new InvalidDataException(InvalidExcelMessage);
 
-        // If the extension promises an Excel workbook but neither Excel signature is present,
-        // text parsing is still attempted: many bank portals export TSV with an .XLS suffix.
-        return ParseText(filePath, bytes);
+        return ParseExcel(filePath);
     }
 
     private static StatementData ParseExcel(string filePath)
@@ -66,80 +70,10 @@ public sealed class StatementParser
         catch (Exception ex) when (ex is not InvalidDataException)
         {
             throw new InvalidDataException(
-                "فایل دارای امضای فایل Excel است، اما خواندن ساختار آن ناموفق بود. فایل را در Excel باز و دوباره ذخیره کنید یا نسخه متنی TSV بگیرید.\n" + ex.Message, ex);
+                "فایل دارای امضای Excel است، اما خواندن ساختار آن ناموفق بود. فایل را در Excel باز و دوباره ذخیره کنید.\n" + ex.Message, ex);
         }
 
         return ParseSheets(filePath, sheets);
-    }
-
-    private static StatementData ParseText(string filePath, byte[] bytes)
-    {
-        string text;
-        try
-        {
-            text = DecodeText(bytes);
-        }
-        catch (Exception ex) when (ex is DecoderFallbackException or ArgumentException)
-        {
-            throw new InvalidDataException("کدگذاری فایل قابل تشخیص نیست. فایل را با UTF-8، Windows-1256 یا Windows-1252 ذخیره کنید.", ex);
-        }
-
-        text = text.TrimStart('\uFEFF', '\u0000');
-        var rows = new List<List<string>>();
-        using var reader = new StringReader(text);
-        string? line;
-        while ((line = reader.ReadLine()) is not null)
-        {
-            if (line.IndexOf('\0') >= 0) line = line.Replace("\0", string.Empty, StringComparison.Ordinal);
-            rows.Add(SplitLine(line).Select(CleanCell).ToList());
-        }
-        return ParseSheets(filePath, new[] { new SheetRows(Path.GetFileName(filePath), rows) });
-    }
-
-    private static string DecodeText(byte[] bytes)
-    {
-        if (bytes.Length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE) return Encoding.Unicode.GetString(bytes);
-        if (bytes.Length >= 2 && bytes[0] == 0xFE && bytes[1] == 0xFF) return Encoding.BigEndianUnicode.GetString(bytes);
-        if (bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) return new UTF8Encoding(true, true).GetString(bytes);
-
-        // Some exports omit a BOM despite being UTF-16.
-        var sampleLength = Math.Min(bytes.Length, 256);
-        var evenNuls = 0;
-        var oddNuls = 0;
-        for (var i = 0; i < sampleLength; i++)
-        {
-            if (bytes[i] != 0) continue;
-            if (i % 2 == 0) evenNuls++; else oddNuls++;
-        }
-        if (oddNuls > sampleLength / 8 && evenNuls == 0) return Encoding.Unicode.GetString(bytes);
-        if (evenNuls > sampleLength / 8 && oddNuls == 0) return Encoding.BigEndianUnicode.GetString(bytes);
-
-        try { return StrictUtf8.GetString(bytes); }
-        catch (DecoderFallbackException) { }
-
-        try
-        {
-            var windows1256 = Encoding.GetEncoding(1256, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
-            return windows1256.GetString(bytes);
-        }
-        catch (DecoderFallbackException) { }
-
-        return Encoding.GetEncoding(1252, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
-    }
-
-    private static List<string> SplitLine(string line)
-    {
-        if (line.Contains('\t')) return line.Split('\t').ToList();
-        if (line.Contains('|'))
-        {
-            var cells = line.Split('|').ToList();
-            if (cells.Count > 0 && string.IsNullOrWhiteSpace(cells[0])) cells.RemoveAt(0);
-            if (cells.Count > 0 && string.IsNullOrWhiteSpace(cells[^1])) cells.RemoveAt(cells.Count - 1);
-            return cells;
-        }
-        if (line.Count(c => c == ';') >= 10) return line.Split(';').ToList();
-        if (line.Count(c => c == ',') >= 10) return line.Split(',').ToList();
-        return new List<string> { line };
     }
 
     private static string CleanCell(string? value)
@@ -211,8 +145,6 @@ public sealed class StatementParser
                 var rawBalance = GetCell(cells, map.Balance);
                 if (!string.IsNullOrWhiteSpace(rawBalance))
                     bankOpeningBalance ??= ParseAmount(rawBalance);
-                else
-                    bankOpeningBalance ??= TryGetRepeatedOpeningBalance(cells, map);
                 continue;
             }
 
@@ -238,10 +170,8 @@ public sealed class StatementParser
             var rowNumberOk = TryParseInt(rowNumberText, out var originalRowNumber) && originalRowNumber > 0;
             var hasAnyTransactionContent = !string.IsNullOrWhiteSpace(description) || deposit != 0 || withdrawal != 0;
 
-            // Prefer the statement row number when present. For alternate bank layouts, a valid
-            // date plus transaction content is enough, and an ordinal is assigned if no row exists.
-            if (!rowNumberOk && (string.IsNullOrWhiteSpace(date) || !hasAnyTransactionContent)) continue;
-            if (rowNumberOk && !hasAnyTransactionContent && string.IsNullOrWhiteSpace(date)) continue;
+            // Rows without a valid date are metadata or totals, not transactions.
+            if (string.IsNullOrWhiteSpace(date) || !hasAnyTransactionContent) continue;
 
             var transaction = new StatementTransaction
             {
@@ -278,21 +208,6 @@ public sealed class StatementParser
             header.BranchCode = transactions.Select(t => t.BranchCode).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s)) ?? string.Empty;
 
         return new StatementData { Header = header, Transactions = transactions };
-    }
-
-    private static decimal? TryGetRepeatedOpeningBalance(IReadOnlyList<string> cells, ColumnMap map)
-    {
-        var excluded = new HashSet<int> { map.Description, map.Tracking, map.BranchCode, map.Time, map.Date, map.RowNumber, map.Identifier };
-        var numericValues = new List<decimal>();
-        for (var i = 0; i < cells.Count; i++)
-        {
-            if (excluded.Contains(i) || string.IsNullOrWhiteSpace(cells[i])) continue;
-            var parsed = ParseAmount(cells[i]);
-            if (parsed != 0m) numericValues.Add(parsed);
-        }
-
-        var repeated = numericValues.GroupBy(v => v).OrderByDescending(g => g.Count()).FirstOrDefault(g => g.Count() >= 2);
-        return repeated?.Key;
     }
 
     private static void DetectFeeRows(IReadOnlyList<StatementTransaction> transactions)
@@ -351,18 +266,25 @@ public sealed class StatementParser
             var hasDeposit = normalized.Any(IsDepositHeader);
             var hasWithdrawal = normalized.Any(IsWithdrawalHeader);
             var hasIban = normalized.Any(s => s.Contains("شبا", StringComparison.Ordinal) || s.Contains("iban", StringComparison.OrdinalIgnoreCase));
-            var primary = hasDescription && hasBalance && (hasDeposit || hasWithdrawal);
-            var secondary = hasDescription && hasBalance && hasDeposit && hasWithdrawal;
-            if (!primary && !secondary) continue;
+            var hasDateHeader = normalized.Any(s =>
+                (s == "تاریخ" || s.Contains("تاریخ تراکنش") ||
+                 s.Equals("date", StringComparison.OrdinalIgnoreCase) ||
+                 s.Contains("transaction date")) &&
+                !s.Contains("از تاریخ") && !s.Contains("تا تاریخ") && !s.Contains("دریافت"));
+            var isTableHeader =
+                (hasDescription && (hasBalance || hasDeposit || hasWithdrawal)) ||
+                (hasBalance && (hasDeposit || hasWithdrawal)) ||
+                (hasDeposit && hasWithdrawal && hasDateHeader);
+            if (!isTableHeader) continue;
 
             var score = 5 + (hasIban ? 2 : 0) + (hasDeposit && hasWithdrawal ? 2 : 0) + (normalized.Any(s => s.Contains("تاریخ") || s.Equals("date", StringComparison.OrdinalIgnoreCase)) ? 1 : 0);
-            var map = BuildColumnMap(cells, hasIban && cells.Count >= 13);
+            var map = BuildColumnMap(cells);
             if (best is null || score > best.Score) best = new HeaderMatch(rowIndex, map, score);
         }
         return best;
     }
 
-    private static ColumnMap BuildColumnMap(List<string> headers, bool legacyFallback)
+    private static ColumnMap BuildColumnMap(List<string> headers)
     {
         var normalized = headers.Select(NormalizeText).ToList();
         int Find(Predicate<string> predicate) => normalized.FindIndex(predicate);
@@ -377,32 +299,25 @@ public sealed class StatementParser
             Deposit = Find(IsDepositHeader),
             Withdrawal = Find(IsWithdrawalHeader),
             BranchCode = Find(s => s.Contains("شعبه") || s.Equals("branch", StringComparison.OrdinalIgnoreCase) || s.Contains("branch code")),
-            Tracking = Find(s => s.Contains("پیگیری") && !s.Contains("واریز") || s.Contains("tracking")),
+            Tracking = Find(s => (s.Contains("پیگیری") && !s.Contains("واریز")) || s.Contains("tracking")),
             Time = Find(s => s == "زمان" || s.Contains("ساعت") || s.Equals("time", StringComparison.OrdinalIgnoreCase)),
             Date = Find(s => (s == "تاریخ" || s.Contains("تاریخ تراکنش") || s.Equals("date", StringComparison.OrdinalIgnoreCase) || s.Contains("transaction date")) && !s.Contains("از تاریخ") && !s.Contains("تا تاریخ") && !s.Contains("دریافت")),
             RowNumber = Find(s => s == "ردیف" || s.Contains("شماره ردیف") || s.Equals("row", StringComparison.OrdinalIgnoreCase) || s.Equals("row number", StringComparison.OrdinalIgnoreCase))
         };
 
-        if (legacyFallback)
-        {
-            map.Iban = Fallback(map.Iban, 0);
-            map.Description = Fallback(map.Description, 1);
-            map.TrackingDeposit = Fallback(map.TrackingDeposit, 2);
-            map.Identifier = Fallback(map.Identifier, 3);
-            map.Counterparty = Fallback(map.Counterparty, 4);
-            map.Balance = Fallback(map.Balance, 5);
-            map.Deposit = Fallback(map.Deposit, 6);
-            map.Withdrawal = Fallback(map.Withdrawal, 7);
-            map.BranchCode = Fallback(map.BranchCode, 8);
-            map.Tracking = Fallback(map.Tracking, 9);
-            map.Time = Fallback(map.Time, 10);
-            map.Date = Fallback(map.Date, 11);
-            map.RowNumber = Fallback(map.RowNumber, 12);
-        }
+        if (map.Description < 0)
+            throw new InvalidDataException("ستون ضروری «توضیحات» در فایل پیدا نشد.");
+        if (map.Balance < 0)
+            throw new InvalidDataException("ستون ضروری «مانده» در فایل پیدا نشد.");
+        if (map.Deposit < 0)
+            throw new InvalidDataException("ستون ضروری «واریز» در فایل پیدا نشد.");
+        if (map.Withdrawal < 0)
+            throw new InvalidDataException("ستون ضروری «برداشت» در فایل پیدا نشد.");
+        if (map.Date < 0)
+            throw new InvalidDataException("ستون ضروری «تاریخ» در فایل پیدا نشد.");
         return map;
     }
 
-    private static int Fallback(int found, int fallback) => found >= 0 ? found : fallback;
     private static bool IsDescriptionHeader(string s) => s.Contains("توضیحات") || s == "شرح" || s.Contains("شرح تراکنش") || s.Equals("description", StringComparison.OrdinalIgnoreCase) || s.Equals("narration", StringComparison.OrdinalIgnoreCase);
     private static bool IsDepositHeader(string s) =>
         (s == "واریز" || s.StartsWith("واریز ", StringComparison.Ordinal) || s.Contains("مبلغ واریز") ||
@@ -429,25 +344,6 @@ public sealed class StatementParser
         result.BranchCode = FindLabeledValue(rows, scanLimit, s => s.Contains("کد شعبه"), preferNext: false);
         result.Iban = NormalizeIban(FindLabeledValue(rows, scanLimit, s => s.Contains("شماره حساب شبا") || s == "شبا" || s.Contains("شماره شبا"), preferNext: true));
         result.ReceivedDate = FindLabeledValue(rows, scanLimit, s => s.Contains("تاریخ دریافت") || s.Contains("تاریخ تهیه"), preferNext: false);
-
-        // Preserve the well-documented legacy TSV positions as a fallback, but prefer label-based extraction.
-        if (rows.Count > 0)
-        {
-            var first = rows[0].Select(CleanCell).ToList();
-            var hasLegacyMetadataLayout = first.Count > 7 &&
-                (NormalizeText(GetCell(first, 1)).Contains("تا تاریخ") ||
-                 NormalizeText(GetCell(first, 3)).Contains("از تاریخ") ||
-                 NormalizeText(GetCell(first, 5)).Contains("کد شعبه") ||
-                 NormalizeText(GetCell(first, 6)).Contains("شبا"));
-            if (hasLegacyMetadataLayout)
-            {
-                if (string.IsNullOrWhiteSpace(result.ReportTo)) result.ReportTo = GetCell(first, 0);
-                if (string.IsNullOrWhiteSpace(result.ReportFrom)) result.ReportFrom = GetCell(first, 2);
-                if (string.IsNullOrWhiteSpace(result.BranchCode)) result.BranchCode = GetCell(first, 4);
-                if (string.IsNullOrWhiteSpace(result.Iban) && first.Count > 7) result.Iban = NormalizeIban(GetCell(first, 7));
-                if (string.IsNullOrWhiteSpace(result.ReceivedDate) && first.Count > 8) result.ReceivedDate = GetCell(first, 8);
-            }
-        }
 
         for (var r = 0; r < scanLimit; r++)
         {

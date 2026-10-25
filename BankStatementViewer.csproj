@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -16,10 +16,14 @@
     <AssemblyName>BankStatementViewer</AssemblyName>
     <StartupObject>BankStatementViewer.App</StartupObject>
     <ApplicationIcon>005-money.ico</ApplicationIcon>
-    <FileVersion>1.0.4.0</FileVersion>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.5.0</FileVersion>
+    <AssemblyVersion>1.0.5.0</AssemblyVersion>
   </PropertyGroup>
+
+  <!-- Test sources live under the repository root but must only compile in the test project. -->
   <ItemGroup>
+    <Compile Remove="tests/**/*.cs" />
+    <EmbeddedResource Remove="tests/**/*" />
     <None Remove="Agri-bank_logo.png" />
   </ItemGroup>
   <ItemGroup>
