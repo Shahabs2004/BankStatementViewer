@@ -21,7 +21,7 @@ public sealed class StatementParserTests
         Assert.Equal("1405/07/17", result.Header.ReportFrom);
         Assert.Equal("1405/07/18", result.Header.ReportTo);
         Assert.Equal("1962", result.Header.BranchCode);
-        Assert.Equal("IR48016000000000000733453606", result.Header.Iban);
+        Assert.Equal("IR00000000000000000000000000", result.Header.Iban);
         Assert.Equal("1405/07/21", result.Header.ReceivedDate);
     }
 
