@@ -10,7 +10,6 @@ namespace BankStatementViewer;
 
 public partial class MainWindow : Window
 {
-    private bool _startupFileDialogShown;
     private readonly ExcelExportService _excelExportService = new();
     private readonly PrintService _printService = new();
     private IReadOnlyList<string>? _lastPrintColumns;
@@ -23,10 +22,7 @@ public partial class MainWindow : Window
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         ApplyGridColumnSettings();
-        if (_startupFileDialogShown) return;
-        _startupFileDialogShown = true;
-        OpenStatementDialog();
-        ApplyGridColumnSettings();
+        // Do not prompt for a statement file at startup. The user can open a local file or read from FTP.
     }
 
     private void About_Click(object sender, RoutedEventArgs e)
@@ -36,6 +32,60 @@ public partial class MainWindow : Window
     }
 
     private void OpenFile_Click(object sender, RoutedEventArgs e) => OpenStatementDialog();
+
+    private readonly BankStatementViewer.Services.FtpStatementService _ftpService = new();
+
+    private void FtpSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new BankStatementViewer.Views.FtpSettingsWindow(_ftpService.LoadSettings()) { Owner = this };
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                _ftpService.SaveSettings(dialog.Settings);
+                MessageBox.Show(this, "تنظیمات FTP ذخیره شد.", "تنظیمات FTP", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"ذخیره تنظیمات FTP ناموفق بود:\\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    private async void ReadFtp_Click(object sender, RoutedEventArgs e)
+    {
+        var settings = _ftpService.LoadSettings();
+        if (string.IsNullOrWhiteSpace(settings.Host))
+        {
+            MessageBox.Show(this, "ابتدا تنظیمات FTP را تکمیل کنید.", "خواندن از FTP", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        try
+        {
+            SetBusy(true, "در حال دریافت فهرست فایل‌های FTP...");
+            var files = await Task.Run(() => _ftpService.ListExcelFiles(settings));
+            if (files.Count == 0)
+            {
+                MessageBox.Show(this, "فایل Excel در مسیر FTP پیدا نشد.", "خواندن از FTP", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var picker = new BankStatementViewer.Views.FtpFilePickerWindow(files) { Owner = this };
+            if (picker.ShowDialog() != true || picker.SelectedFile is null) return;
+
+            SetBusy(true, "در حال دانلود فایل از FTP...");
+            var localPath = await Task.Run(() => _ftpService.Download(settings, picker.SelectedFile));
+            ViewModel.LoadStatement(localPath);
+            Title = $"نمایش‌دهنده گردش حساب — {Path.GetFileName(localPath)}";
+            ApplyGridColumnSettings();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, $"خواندن فایل از FTP ناموفق بود:\\n{ex.Message}", "خطای FTP", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally { SetBusy(false); }
+    }
 
     private void OpenStatementDialog()
     {
@@ -272,6 +322,8 @@ public partial class MainWindow : Window
     private void SetBusy(bool busy, string status = "", bool indeterminate = true)
     {
         OpenFileButton.IsEnabled = !busy;
+        FtpSettingsButton.IsEnabled = !busy;
+        ReadFtpButton.IsEnabled = !busy;
         ExportExcelButton.IsEnabled = !busy;
         PrintPortraitButton.IsEnabled = !busy;
         PrintLandscapeButton.IsEnabled = !busy;
