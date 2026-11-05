@@ -2,6 +2,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentFTP;
 
 namespace BankStatementViewer.Services;
@@ -13,6 +14,7 @@ public sealed class FtpConnectionSettings
     public int Port { get; set; } = 21;
     public string UserName { get; set; } = "";
     public string ProtectedPassword { get; set; } = "";
+    [JsonIgnore] public string Password { get; set; } = "";
     public string DownloadDirectory { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 }
 
@@ -81,12 +83,12 @@ public sealed class FtpStatementService
         return destination;
     }
 
-    private static AsyncFtpClient CreateClient(FtpConnectionSettings settings)
+    private static FtpClient CreateClient(FtpConnectionSettings settings)
     {
         var password = "";
         if (!string.IsNullOrWhiteSpace(settings.ProtectedPassword))
             password = Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(settings.ProtectedPassword), null, DataProtectionScope.CurrentUser));
-        var client = new AsyncFtpClient(settings.Host, settings.UserName, password, settings.Port);
+        var client = new FtpClient(settings.Host, settings.UserName, password, settings.Port);
         client.Config.EncryptionMode = FtpEncryptionMode.None;
         client.Config.DataConnectionType = FtpDataConnectionType.AutoPassive;
         return client;
