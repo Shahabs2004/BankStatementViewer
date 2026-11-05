@@ -1,4 +1,4 @@
-﻿name: Build and Release
+name: Build and Release
 
 on:
   push:
@@ -29,170 +29,29 @@ jobs:
       - name: Determine release version
         id: version
         shell: pwsh
-        run: |
-          if ("${{ github.ref_type }}" -eq 'tag') {
-            $version = "$env:GITHUB_REF_NAME"
-          } else {
-            $latestTag = git tag --list 'v*' --sort=-version:refname | Select-Object -First 1
-            if ([string]::IsNullOrWhiteSpace($latestTag)) { $latestTag = 'v1.0.0' }
-            if ($latestTag -notmatch '^v?(\d+)\.(\d+)\.(\d+)        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Restore dependencies
-        run: dotnet restore BankStatementViewer.csproj --verbosity minimal -p:InvariantGlobalization=false
-
-      - name: Build Release
-        run: dotnet build BankStatementViewer.csproj --configuration Release --no-restore --verbosity minimal -p:InvariantGlobalization=false
-
-      # ============ LIGHT VERSION ============
-      - name: Publish Light Version (Framework-Dependent)
-        run: dotnet publish BankStatementViewer.csproj -c Release -o publish-light -f net8.0-windows --no-self-contained -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal
-
-      # ============ FULL VERSION ============
-      - name: Publish Full Version (Self-Contained)
-        run: dotnet publish BankStatementViewer.csproj -c Release -o publish-full --self-contained -r win-x64 -p:PublishReadyToRun=true -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal
-
-      # Keep only English and Persian satellite culture folders. Culture directories are
-      # identified through .NET CultureInfo, so directories such as runtimes/win-x64 are safe.
-      # The SatelliteResourceLanguages project property filters satellite assemblies at build time;
-      # this cleanup catches additional culture folders supplied by the self-contained runtime.
-      - name: Keep only English and Persian culture folders and verify runtime
-        shell: pwsh
-        run: |
-          $knownCultureNames = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
-          foreach ($culture in [System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::AllCultures)) {
-            if (-not [string]::IsNullOrWhiteSpace($culture.Name)) {
-              [void]$knownCultureNames.Add($culture.Name)
-            }
-          }
-
-          $isEnglishOrPersian = { param([string]$name) $name -match '^(?i:en|fa)(-|$)' }
-          foreach ($publishPath in @('publish-light', 'publish-full')) {
-            if (-not (Test-Path $publishPath)) {
-              throw "Publish directory does not exist: $publishPath"
-            }
-
-            $cultureDirs = @(Get-ChildItem -Path $publishPath -Directory -Recurse -Force |
-              Where-Object {
-                $knownCultureNames.Contains($_.Name) -and -not (& $isEnglishOrPersian $_.Name)
-              } |
-              Sort-Object { $_.FullName.Length } -Descending)
-
-            foreach ($dir in $cultureDirs) {
-              if (Test-Path -LiteralPath $dir.FullName) {
-                Remove-Item -LiteralPath $dir.FullName -Recurse -Force
-                Write-Host "Removed non-English/non-Persian culture folder: $($dir.FullName)"
-              }
-            }
-          }
-
-          $publishPath = 'publish-full'
-          $requiredFiles = @(
-            'BankStatementViewer.exe',
-            'BankStatementViewer.runtimeconfig.json',
-            'coreclr.dll',
-            'hostfxr.dll',
-            'hostpolicy.dll',
-            'System.Private.CoreLib.dll'
-          )
-          foreach ($file in $requiredFiles) {
-            if (-not (Test-Path (Join-Path $publishPath $file))) {
-              throw "Required self-contained runtime file is missing: $file"
-            }
-          }
-
-          $runtimeConfigPath = Join-Path $publishPath 'BankStatementViewer.runtimeconfig.json'
-          $runtimeConfig = Get-Content $runtimeConfigPath -Raw | ConvertFrom-Json
-          $configProperties = $runtimeConfig.runtimeOptions.configProperties
-          $invariant = $null
-          if ($null -ne $configProperties) {
-            $invariant = $configProperties.'System.Globalization.Invariant'
-          }
-          if ($invariant -eq $true -or "$invariant" -eq 'true') {
-            throw 'Invariant globalization is enabled in the published runtimeconfig. WPF startup may fail while resolving en-US/fa-IR culture.'
-          }
-
-          $remaining = @(Get-ChildItem -Path $publishPath -Directory -Recurse -Force |
-            Where-Object {
-              $knownCultureNames.Contains($_.Name) -and -not (& $isEnglishOrPersian $_.Name)
-            })
-          if ($remaining.Count -gt 0) {
-            $remaining | ForEach-Object { Write-Host "Unexpected culture folder: $($_.FullName)" }
-            throw 'One or more non-English/non-Persian culture folders remain.'
-          }
-
-          Write-Host 'Runtime files verified. Globalization is not invariant.'
-          Write-Host 'Only English and Persian culture folders remain; runtimes and other non-culture folders were preserved.'
-
-      - name: Create Light Version ZIP
-        shell: pwsh
-        run: |
-          $version = "${{ steps.version.outputs.TAG }}"
-          Compress-Archive -Path publish-light/* -DestinationPath "BankStatementViewer-$version-light-win-x64.zip" -Force
-
-      - name: Create Full Version ZIP
-        shell: pwsh
-        run: |
-          $version = "${{ steps.version.outputs.TAG }}"
-          Compress-Archive -Path publish-full/* -DestinationPath "BankStatementViewer-$version-full-win-x64.zip" -Force
-
-      - name: Get File Sizes
-        id: sizes
-        shell: pwsh
-        run: |
-          $light = Get-ChildItem "BankStatementViewer-*-light-win-x64.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
-          $full = Get-ChildItem "BankStatementViewer-*-full-win-x64.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
-
-          if ($light) { $lightSize = "$([Math]::Round($light.Length / 1MB, 2)) MB" } else { $lightSize = 'N/A' }
-          if ($full) { $fullSize = "$([Math]::Round($full.Length / 1MB, 2)) MB" } else { $fullSize = 'N/A' }
-
-          "LIGHT_SIZE=$lightSize" >> $env:GITHUB_OUTPUT
-          "FULL_SIZE=$fullSize" >> $env:GITHUB_OUTPUT
-
-      - name: Get Release Notes
-        id: notes
-        shell: pwsh
-        run: |
-          $tag = "${{ steps.version.outputs.TAG }}"
-          $notes = git tag -l --format='%(contents)' $tag
-          if ([string]::IsNullOrWhiteSpace($notes)) { $notes = git log -1 --pretty=%B }
-          $delimiter = "NOTES_$([Guid]::NewGuid().ToString('N'))"
-          "NOTES<<$delimiter" >> $env:GITHUB_OUTPUT
-          $notes >> $env:GITHUB_OUTPUT
-          "$delimiter" >> $env:GITHUB_OUTPUT
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.version.outputs.TAG }}
-          name: ${{ steps.version.outputs.TAG }}
-          files: |
-            BankStatementViewer-*-light-win-x64.zip
-            BankStatementViewer-*-full-win-x64.zip
-          body: |
-            ${{ steps.notes.outputs.NOTES }}
-
-            ## Download Options
-
-            ### Light Version (Framework-Dependent)
-            - Size: ${{ steps.sizes.outputs.LIGHT_SIZE }}
-            - Requires the .NET 8 Desktop Runtime.
-            - Best for computers that already have .NET 8 installed.
-
-            ### Full Version (Self-Contained)
-            - Size: ${{ steps.sizes.outputs.FULL_SIZE }}
-            - Includes the .NET runtime.
-            - Extract and run `BankStatementViewer.exe`.
-          draft: false
-          prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-) {
-              throw "Latest tag is not a semantic version: $latestTag"
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if ($env:REF_TYPE -eq 'tag') {
+            $version = $env:REF_NAME
+            if ($version -notmatch '^v\d+\.\d+\.\d+$') {
+              throw "Tag '$version' is invalid. Use the three-part format vMAJOR.MINOR.PATCH (for example v1.1.1)."
             }
+          }
+          else {
+            $latestTag = git tag --list 'v[0-9]*' --sort=-version:refname | Select-Object -First 1
+            if ([string]::IsNullOrWhiteSpace($latestTag)) {
+              $latestTag = 'v1.0.0'
+            }
+
+            if ($latestTag -notmatch '^v(\d+)\.(\d+)\.(\d+)$') {
+              throw "Latest tag '$latestTag' is not a three-part version."
+            }
+
             $version = "v$($Matches[1]).$($Matches[2]).$([int]$Matches[3] + 1)"
           }
+
           "TAG=$version" >> $env:GITHUB_OUTPUT
           Write-Host "Release version: $version"
 
@@ -207,18 +66,12 @@ jobs:
       - name: Build Release
         run: dotnet build BankStatementViewer.csproj --configuration Release --no-restore --verbosity minimal -p:InvariantGlobalization=false
 
-      # ============ LIGHT VERSION ============
       - name: Publish Light Version (Framework-Dependent)
         run: dotnet publish BankStatementViewer.csproj -c Release -o publish-light -f net8.0-windows --no-self-contained -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal
 
-      # ============ FULL VERSION ============
       - name: Publish Full Version (Self-Contained)
-        run: dotnet publish BankStatementViewer.csproj -c Release -o publish-full --self-contained -r win-x64 -p:PublishReadyToRun=true -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal
+        run: dotnet publish BankStatementViewer.csproj -c Release -o publish-full -f net8.0-windows -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal
 
-      # Keep only English and Persian satellite culture folders. Culture directories are
-      # identified through .NET CultureInfo, so directories such as runtimes/win-x64 are safe.
-      # The SatelliteResourceLanguages project property filters satellite assemblies at build time;
-      # this cleanup catches additional culture folders supplied by the self-contained runtime.
       - name: Keep only English and Persian culture folders and verify runtime
         shell: pwsh
         run: |
@@ -229,7 +82,6 @@ jobs:
             }
           }
 
-          $isEnglishOrPersian = { param([string]$name) $name -match '^(?i:en|fa)(-|$)' }
           foreach ($publishPath in @('publish-light', 'publish-full')) {
             if (-not (Test-Path $publishPath)) {
               throw "Publish directory does not exist: $publishPath"
@@ -237,19 +89,18 @@ jobs:
 
             $cultureDirs = @(Get-ChildItem -Path $publishPath -Directory -Recurse -Force |
               Where-Object {
-                $knownCultureNames.Contains($_.Name) -and -not (& $isEnglishOrPersian $_.Name)
+                $knownCultureNames.Contains($_.Name) -and $_.Name -notmatch '^(?i:en|fa)(-|$)'
               } |
               Sort-Object { $_.FullName.Length } -Descending)
 
             foreach ($dir in $cultureDirs) {
               if (Test-Path -LiteralPath $dir.FullName) {
                 Remove-Item -LiteralPath $dir.FullName -Recurse -Force
-                Write-Host "Removed non-English/non-Persian culture folder: $($dir.FullName)"
+                Write-Host "Removed culture folder: $($dir.FullName)"
               }
             }
           }
 
-          $publishPath = 'publish-full'
           $requiredFiles = @(
             'BankStatementViewer.exe',
             'BankStatementViewer.runtimeconfig.json',
@@ -258,34 +109,20 @@ jobs:
             'hostpolicy.dll',
             'System.Private.CoreLib.dll'
           )
+
           foreach ($file in $requiredFiles) {
-            if (-not (Test-Path (Join-Path $publishPath $file))) {
+            if (-not (Test-Path (Join-Path 'publish-full' $file))) {
               throw "Required self-contained runtime file is missing: $file"
             }
           }
 
-          $runtimeConfigPath = Join-Path $publishPath 'BankStatementViewer.runtimeconfig.json'
-          $runtimeConfig = Get-Content $runtimeConfigPath -Raw | ConvertFrom-Json
-          $configProperties = $runtimeConfig.runtimeOptions.configProperties
-          $invariant = $null
-          if ($null -ne $configProperties) {
-            $invariant = $configProperties.'System.Globalization.Invariant'
-          }
+          $runtimeConfig = Get-Content 'publish-full/BankStatementViewer.runtimeconfig.json' -Raw | ConvertFrom-Json
+          $invariant = $runtimeConfig.runtimeOptions.configProperties.'System.Globalization.Invariant'
           if ($invariant -eq $true -or "$invariant" -eq 'true') {
-            throw 'Invariant globalization is enabled in the published runtimeconfig. WPF startup may fail while resolving en-US/fa-IR culture.'
+            throw 'Invariant globalization is enabled. The application requires normal globalization support.'
           }
 
-          $remaining = @(Get-ChildItem -Path $publishPath -Directory -Recurse -Force |
-            Where-Object {
-              $knownCultureNames.Contains($_.Name) -and -not (& $isEnglishOrPersian $_.Name)
-            })
-          if ($remaining.Count -gt 0) {
-            $remaining | ForEach-Object { Write-Host "Unexpected culture folder: $($_.FullName)" }
-            throw 'One or more non-English/non-Persian culture folders remain.'
-          }
-
-          Write-Host 'Runtime files verified. Globalization is not invariant.'
-          Write-Host 'Only English and Persian culture folders remain; runtimes and other non-culture folders were preserved.'
+          Write-Host 'Self-contained runtime verified; globalization is not invariant.'
 
       - name: Create Light Version ZIP
         shell: pwsh
@@ -303,12 +140,10 @@ jobs:
         id: sizes
         shell: pwsh
         run: |
-          $light = Get-ChildItem "BankStatementViewer-*-light-win-x64.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
-          $full = Get-ChildItem "BankStatementViewer-*-full-win-x64.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
-
-          if ($light) { $lightSize = "$([Math]::Round($light.Length / 1MB, 2)) MB" } else { $lightSize = 'N/A' }
-          if ($full) { $fullSize = "$([Math]::Round($full.Length / 1MB, 2)) MB" } else { $fullSize = 'N/A' }
-
+          $light = Get-ChildItem "BankStatementViewer-*-light-win-x64.zip" | Select-Object -First 1
+          $full = Get-ChildItem "BankStatementViewer-*-full-win-x64.zip" | Select-Object -First 1
+          $lightSize = "$([Math]::Round($light.Length / 1MB, 2)) MB"
+          $fullSize = "$([Math]::Round($full.Length / 1MB, 2)) MB"
           "LIGHT_SIZE=$lightSize" >> $env:GITHUB_OUTPUT
           "FULL_SIZE=$fullSize" >> $env:GITHUB_OUTPUT
 
@@ -318,15 +153,19 @@ jobs:
         run: |
           $tag = "${{ steps.version.outputs.TAG }}"
           $notes = git tag -l --format='%(contents)' $tag
-          if ([string]::IsNullOrWhiteSpace($notes)) { $notes = "Release $tag" }
+          if ([string]::IsNullOrWhiteSpace($notes)) {
+            $notes = git log -1 --pretty=%B
+          }
           $delimiter = "NOTES_$([Guid]::NewGuid().ToString('N'))"
           "NOTES<<$delimiter" >> $env:GITHUB_OUTPUT
           $notes >> $env:GITHUB_OUTPUT
           "$delimiter" >> $env:GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: ${{ steps.version.outputs.TAG }}
           files: |
             BankStatementViewer-*-light-win-x64.zip
             BankStatementViewer-*-full-win-x64.zip
