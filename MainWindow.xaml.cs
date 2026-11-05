@@ -76,9 +76,16 @@ public partial class MainWindow : Window
 
             SetBusy(true, "در حال دانلود فایل از FTP...");
             var localPath = await Task.Run(() => _ftpService.Download(settings, picker.SelectedFile));
-            ViewModel.LoadStatement(localPath);
-            Title = $"نمایش‌دهنده گردش حساب — {Path.GetFileName(localPath)}";
-            ApplyGridColumnSettings();
+
+            // All ViewModel and WPF-bound collection updates must run on the UI dispatcher.
+            // Keep the FTP transfer on a worker thread, then explicitly return to the UI thread
+            // before parsing/loading the statement and refreshing the grid.
+            await Dispatcher.InvokeAsync(() =>
+            {
+                ViewModel.LoadStatement(localPath);
+                Title = $"نمایش‌دهنده گردش حساب — {Path.GetFileName(localPath)}";
+                ApplyGridColumnSettings();
+            });
         }
         catch (Exception ex)
         {
