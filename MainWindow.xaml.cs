@@ -14,6 +14,7 @@ public partial class MainWindow : Window
     private readonly PrintService _printService = new();
     private IReadOnlyList<string>? _lastPrintColumns;
     private IReadOnlyList<string>? _lastExcelColumns;
+    private bool _sidePanelsVisible = true;
 
     private MainViewModel ViewModel => (MainViewModel)DataContext;
 
@@ -23,6 +24,24 @@ public partial class MainWindow : Window
     {
         ApplyGridColumnSettings();
         // Do not prompt for a statement file at startup. The user can open a local file or read from FTP.
+    }
+
+    private void TogglePanels_Click(object sender, RoutedEventArgs e)
+    {
+        _sidePanelsVisible = !_sidePanelsVisible;
+
+        AccountInfoPanel.Visibility = _sidePanelsVisible ? Visibility.Visible : Visibility.Collapsed;
+        FiltersPanel.Visibility = _sidePanelsVisible ? Visibility.Visible : Visibility.Collapsed;
+        FiltersSplitter.Visibility = _sidePanelsVisible ? Visibility.Visible : Visibility.Collapsed;
+        FilterColumnDefinition.Width = _sidePanelsVisible ? new GridLength(300) : new GridLength(0);
+        SplitterColumnDefinition.Width = _sidePanelsVisible ? new GridLength(6) : new GridLength(0);
+
+        TogglePanelsButton.Content = _sidePanelsVisible ? "\uE8A7" : "\uE8A9";
+        var hint = _sidePanelsVisible
+            ? "مخفی‌کردن فیلترها و مشخصات حساب"
+            : "نمایش فیلترها و مشخصات حساب";
+        TogglePanelsButton.ToolTip = hint;
+        System.Windows.Automation.AutomationProperties.SetName(TogglePanelsButton, hint);
     }
 
     private void About_Click(object sender, RoutedEventArgs e)
