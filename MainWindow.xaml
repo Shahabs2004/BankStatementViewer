@@ -84,6 +84,8 @@
 
         <WrapPanel Grid.Row="1" Margin="0,0,0,6">
             <Button x:Name="OpenFileButton" Content="باز کردن صورت‌حساب" Click="OpenFile_Click" />
+            <Button x:Name="FtpSettingsButton" Content="تنظیمات FTP" Click="FtpSettings_Click" />
+            <Button x:Name="ReadFtpButton" Content="خواندن از FTP" Click="ReadFtp_Click" />
             <Button x:Name="ExportExcelButton" Content="خروجی Excel" Click="ExportExcel_Click" />
             <Button x:Name="PrintPortraitButton" Content="چاپ عمودی" Click="PrintPortrait_Click" />
             <Button x:Name="PrintLandscapeButton" Content="چاپ افقی" Click="PrintLandscape_Click" />
