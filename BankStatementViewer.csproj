@@ -16,8 +16,8 @@
     <AssemblyName>BankStatementViewer</AssemblyName>
     <StartupObject>BankStatementViewer.App</StartupObject>
     <ApplicationIcon>005-money.ico</ApplicationIcon>
-    <FileVersion>1.0.5.0</FileVersion>
-    <AssemblyVersion>1.0.5.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <!-- Test sources live under the repository root but must only compile in the test project. -->
