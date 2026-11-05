@@ -53,7 +53,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#F2F5F7" BorderBrush="#D5DDE3" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,6">
+        <Border x:Name="AccountInfoPanel" Grid.Row="0" Background="#F2F5F7" BorderBrush="#D5DDE3" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,6">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*" />
@@ -98,6 +98,8 @@
         </Border>
 
         <WrapPanel Grid.Row="1" Margin="0,0,0,6" VerticalAlignment="Center">
+            <Button x:Name="TogglePanelsButton" Style="{StaticResource IconButtonStyle}" Content="&#xE8A7;" Click="TogglePanels_Click"
+                    ToolTip="مخفی‌کردن فیلترها و مشخصات حساب" AutomationProperties.Name="مخفی‌کردن فیلترها و مشخصات حساب" />
             <Button x:Name="OpenFileButton" Style="{StaticResource IconButtonStyle}" Content="&#xE8E5;" Click="OpenFile_Click"
                     ToolTip="باز کردن صورت‌حساب از فایل‌های رایانه" AutomationProperties.Name="باز کردن صورت‌حساب" />
             <Button x:Name="FtpSettingsButton" Style="{StaticResource IconButtonStyle}" Content="&#xE753;" Click="FtpSettings_Click"
@@ -141,11 +143,11 @@
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300" />
-                <ColumnDefinition Width="6" />
+                <ColumnDefinition x:Name="FilterColumnDefinition" Width="300" />
+                <ColumnDefinition x:Name="SplitterColumnDefinition" Width="6" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer x:Name="FiltersPanel" Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="0,0,7,0">
                     <GroupBox Header="نوع تراکنش" Style="{StaticResource FilterGroupBoxStyle}" Tag="{Binding Filters.TypeFilterEnabled}">
                         <StackPanel>
@@ -248,7 +250,7 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#D5DDE3" ShowsPreview="True" />
+            <GridSplitter x:Name="FiltersSplitter" Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#D5DDE3" ShowsPreview="True" />
 
             <DataGrid x:Name="TransactionsGrid" Grid.Column="2" ItemsSource="{Binding FilteredTransactions}" AutoGenerateColumns="False"
                       IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
