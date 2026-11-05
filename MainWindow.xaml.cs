@@ -72,10 +72,15 @@ public partial class MainWindow : Window
             }
 
             var picker = new BankStatementViewer.Views.FtpFilePickerWindow(files) { Owner = this };
-            if (picker.ShowDialog() != true || picker.SelectedFile is null) return;
+            if (picker.ShowDialog() != true) return;
+
+            // Read the selected item on the WPF UI thread. Never access FilesGrid
+            // (through picker.SelectedFile) from inside Task.Run.
+            var selectedFile = picker.SelectedFile;
+            if (selectedFile is null) return;
 
             SetBusy(true, "در حال دانلود فایل از FTP...");
-            var localPath = await Task.Run(() => _ftpService.Download(settings, picker.SelectedFile));
+            var localPath = await Task.Run(() => _ftpService.Download(settings, selectedFile));
 
             // All ViewModel and WPF-bound collection updates must run on the UI dispatcher.
             // Keep the FTP transfer on a worker thread, then explicitly return to the UI thread
