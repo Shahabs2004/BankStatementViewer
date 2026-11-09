@@ -4,7 +4,7 @@
         xmlns:vm="clr-namespace:BankStatementViewer.ViewModels"
         Title="نمایش‌دهنده و فیلتر گردش حساب بانکی" Height="800" Width="1300" WindowState="Maximized"
         MinHeight="550" MinWidth="800" WindowStartupLocation="CenterScreen"
-        FlowDirection="RightToLeft" FontFamily="{Binding FontFamilyName}" FontSize="12"
+        FlowDirection="RightToLeft" FontFamily="{Binding FontFamilyName}" FontSize="{Binding DisplayFontSize}"
         Loaded="MainWindow_Loaded"
         xml:lang="fa-IR">
     <Window.Resources>
