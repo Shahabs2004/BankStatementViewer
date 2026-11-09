@@ -111,7 +111,15 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public double DisplayFontSize
     {
         get => _displayFontSize;
-        private set => SetField(ref _displayFontSize, value);
+        set
+        {
+            var normalized = Math.Clamp(value, 9, 18);
+            if (SetField(ref _displayFontSize, normalized))
+            {
+                _settings.DisplayFontSize = normalized;
+                SaveSettingsQuietly();
+            }
+        }
     }
 
     public bool AutoFitColumns
@@ -177,9 +185,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _settings.RowHeightOption = AvailableRowHeightOptions.Contains(settings.RowHeightOption) ? settings.RowHeightOption : "خودکار";
         if (settings.DisplayColumns is { Count: > 0 })
             SetDisplayColumns(settings.DisplayColumns);
-        _fontFamilyName = _settings.FontFamilyName; _displayFontSize = _settings.DisplayFontSize; _autoFitColumns = _settings.AutoFitColumns;
+        FontFamilyName = _settings.FontFamilyName;
+        DisplayFontSize = _settings.DisplayFontSize;
+        _autoFitColumns = _settings.AutoFitColumns;
         _hideFeeRows = _settings.HideFeeRows; _rowHeightOption = _settings.RowHeightOption;
-        OnPropertyChanged(nameof(FontFamilyName)); OnPropertyChanged(nameof(DisplayFontSize)); OnPropertyChanged(nameof(AutoFitColumns));
+        OnPropertyChanged(nameof(AutoFitColumns));
         OnPropertyChanged(nameof(HideFeeRows)); OnPropertyChanged(nameof(RowHeightOption));
         SaveSettings(); ScheduleApplyFilters();
     }

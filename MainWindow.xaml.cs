@@ -22,6 +22,7 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        ApplyDisplayFontSettings();
         ApplyGridColumnSettings();
         ApplyGridLineSettings();
         // Do not prompt for a statement file at startup. The user can open a local file or read from FTP.
@@ -50,9 +51,19 @@ public partial class MainWindow : Window
         var dialog = new SettingsWindow(ViewModel.SettingsSnapshot) { Owner = this };
         if (dialog.ShowDialog() == true)
         {
-            try { ViewModel.ApplyFullSettings(dialog.Settings); ApplyGridColumnSettings(); ApplyGridLineSettings(); }
+            try { ViewModel.ApplyFullSettings(dialog.Settings); ApplyDisplayFontSettings(); ApplyGridColumnSettings(); ApplyGridLineSettings(); }
             catch (Exception ex) { MessageBox.Show(this, $"ذخیره تنظیمات ناموفق بود:\\n{ex.Message}", "تنظیمات کامل", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
+    }
+
+    private void ApplyDisplayFontSettings()
+    {
+        if (DataContext is not MainViewModel vm) return;
+        var family = new System.Windows.Media.FontFamily(vm.FontFamilyName);
+        FontFamily = family;
+        FontSize = vm.DisplayFontSize;
+        TransactionsGrid.FontFamily = family;
+        TransactionsGrid.FontSize = vm.DisplayFontSize;
     }
 
     private void ApplyGridLineSettings()
