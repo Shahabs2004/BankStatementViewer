@@ -98,41 +98,27 @@
         </Border>
 
         <WrapPanel Grid.Row="1" Margin="0,0,0,6" VerticalAlignment="Center">
+            <Image Source="/Agri-bank_logo.png" Width="34" Height="36" Stretch="Uniform" Margin="3,0,7,0" ToolTip="بانک کشاورزی" />
             <Button x:Name="TogglePanelsButton" Style="{StaticResource IconButtonStyle}" Content="&#xE8A7;" Click="TogglePanels_Click"
                     ToolTip="مخفی‌کردن فیلترها و مشخصات حساب" AutomationProperties.Name="مخفی‌کردن فیلترها و مشخصات حساب" />
             <Button x:Name="OpenFileButton" Style="{StaticResource IconButtonStyle}" Content="&#xE8E5;" Click="OpenFile_Click"
                     ToolTip="باز کردن صورت‌حساب از فایل‌های رایانه" AutomationProperties.Name="باز کردن صورت‌حساب" />
-            <Button x:Name="FtpSettingsButton" Style="{StaticResource IconButtonStyle}" Content="&#xE753;" Click="FtpSettings_Click"
-                    ToolTip="تنظیم آدرس، نام کاربری و رمز عبور FTP" AutomationProperties.Name="تنظیمات FTP" />
+            <Button x:Name="FullSettingsButton" Style="{StaticResource IconButtonStyle}" Content="&#xE713;" Click="FullSettings_Click"
+                    ToolTip="تنظیمات کامل برنامه: چاپ، نمایش، مشخصات شعبه و FTP" AutomationProperties.Name="تنظیمات کامل" />
             <Button x:Name="ReadFtpButton" Style="{StaticResource IconButtonStyle}" Content="&#xE896;" Click="ReadFtp_Click"
                     ToolTip="نمایش فایل‌های موجود در FTP و دریافت صورت‌حساب" AutomationProperties.Name="خواندن از FTP" />
             <Button x:Name="ExportExcelButton" Style="{StaticResource IconButtonStyle}" Content="&#xE9F9;" Click="ExportExcel_Click"
                     ToolTip="ذخیره تراکنش‌های فیلترشده در فایل Excel" AutomationProperties.Name="خروجی Excel" />
-            <Button x:Name="PrintPortraitButton" Style="{StaticResource IconButtonStyle}" Content="&#xE749;" Click="PrintPortrait_Click"
+            <Button x:Name="PrintPortraitButton" Style="{StaticResource IconButtonStyle}" Content="▯" FontFamily="Segoe UI Symbol" FontSize="22" Click="PrintPortrait_Click"
                     ToolTip="چاپ صورت‌حساب در حالت عمودی" AutomationProperties.Name="چاپ عمودی" />
-            <Button x:Name="PrintLandscapeButton" Style="{StaticResource IconButtonStyle}" Content="&#xE74A;" Click="PrintLandscape_Click"
+            <Button x:Name="PrintLandscapeButton" Style="{StaticResource IconButtonStyle}" Content="▱" FontFamily="Segoe UI Symbol" FontSize="22" Click="PrintLandscape_Click"
                     ToolTip="چاپ صورت‌حساب در حالت افقی" AutomationProperties.Name="چاپ افقی" />
             <Button Style="{StaticResource IconButtonStyle}" Content="&#xE8FD;" Click="DisplayColumns_Click"
                     ToolTip="انتخاب ستون‌هایی که در جدول اصلی نمایش داده شوند" AutomationProperties.Name="ستون‌های نمایش" />
-            <TextBlock Text="فونت:" VerticalAlignment="Center" Margin="6,0,2,0" />
-            <ComboBox Width="115" Margin="2" ItemsSource="{Binding AvailableFonts}"
-                      SelectedItem="{Binding FontFamilyName, UpdateSourceTrigger=PropertyChanged}"
-                      ToolTip="انتخاب فونت نمایش برنامه" />
-            <CheckBox Content="عرض خودکار" VerticalAlignment="Center" Margin="5,0"
-                      IsChecked="{Binding AutoFitColumns, UpdateSourceTrigger=PropertyChanged}"
-                      Checked="AutoFitColumns_Changed" Unchecked="AutoFitColumns_Changed"
-                      ToolTip="تنظیم خودکار عرض ستون‌ها با توجه به عنوان و داده‌ها" />
-            <TextBlock Text="ارتفاع:" VerticalAlignment="Center" Margin="5,0,2,0" />
-            <ComboBox Width="75" Margin="2" ItemsSource="{Binding AvailableRowHeightOptions}"
-                      SelectedItem="{Binding RowHeightOption, UpdateSourceTrigger=PropertyChanged}"
-                      SelectionChanged="RowHeightOption_Changed"
-                      ToolTip="تعیین حداقل ارتفاع ردیف؛ متن چندخطی در صورت نیاز فضای بیشتری می‌گیرد" />
-            <CheckBox Content="پنهان‌کردن کارمزد" IsChecked="{Binding HideFeeRows, UpdateSourceTrigger=PropertyChanged}"
-                      VerticalAlignment="Center" Margin="5,0" ToolTip="ردیف‌های کارمزد پنهان می‌شوند، اما مجموع کارمزد در خلاصه باقی می‌ماند" />
+
             <Button Style="{StaticResource IconButtonStyle}" Content="&#xE9D2;" Click="QuickSummary_Click"
                     ToolTip="نمایش خلاصه کانال‌ها، روزها و تراکنش‌های بزرگ" AutomationProperties.Name="خلاصه سریع" />
-            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE74E;" Click="SaveSettings_Click"
-                    ToolTip="ذخیره تنظیمات برنامه، ستون‌ها، فونت و فیلترها" AutomationProperties.Name="ذخیره تنظیمات" />
+
             <Button Style="{StaticResource IconButtonStyle}" Content="&#xE894;" Click="ClearFilters_Click"
                     ToolTip="پاک‌کردن همه فیلترهای فعال" AutomationProperties.Name="پاک‌کردن فیلترها" />
             <ProgressBar x:Name="OperationProgressBar" Width="100" Height="10" Margin="6,0,3,0"
@@ -255,7 +241,7 @@
             <DataGrid x:Name="TransactionsGrid" Grid.Column="2" ItemsSource="{Binding FilteredTransactions}" AutoGenerateColumns="False"
                       IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
                       CanUserSortColumns="True" CanUserResizeColumns="True" SelectionMode="Extended"
-                      SelectionUnit="FullRow" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      SelectionUnit="FullRow" HeadersVisibility="Column" GridLinesVisibility="All"
                       RowHeaderWidth="0" BorderBrush="#D5DDE3" BorderThickness="1"
                       FlowDirection="RightToLeft" FontSize="11" CanUserResizeRows="True"
                       EnableRowVirtualization="True" VirtualizingPanel.IsVirtualizing="True"
