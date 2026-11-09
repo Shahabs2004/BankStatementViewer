@@ -107,9 +107,11 @@ public sealed class PrintService
         var rowStartY = headerY + tableHeaderHeight;
         var footerY = pageHeight - footerReserve;
         var bodyHeight = Math.Max(100, footerY - rowStartY - 2);
-        var fontSize = landscape ? 8.6 : 8.3;
+        var fontSize = Math.Clamp(settings.PrintFontSize, 7, 14);
+        var printFont = new FontFamily(string.IsNullOrWhiteSpace(settings.PrintFontFamilyName) ? "Tahoma" : settings.PrintFontFamilyName);
 
-        var measuredRows = transactions.Select(t => new MeasuredRow(t, MeasureRowHeight(t, columns, columnWidths, fontSize, bodyHeight))).ToList();
+        var measuredRows = transactions.Select(t => new MeasuredRow(t,
+            MeasureRowHeight(t, columns, columnWidths, fontSize, bodyHeight, printFont))).ToList();
         var pages = PaginateRows(measuredRows, bodyHeight);
 
         var document = new FixedDocument();
@@ -124,8 +126,8 @@ public sealed class PrintService
                 ClipToBounds = true
             };
 
-            AddAt(page, CreateTextBlock("گزارش گردش حساب بانکی", innerWidth, 23, 14, FontWeights.Bold,
-                TextAlignment.Center, FlowDirection.RightToLeft), margin, 8);
+            AddAt(page, CreateTextBlock("گزارش گردش حساب بانکی", innerWidth, 23, fontSize * 1.7, FontWeights.Bold,
+                TextAlignment.Center, FlowDirection.RightToLeft, printFont), margin, 8);
 
             var logoStream = Application.GetResourceStream(new Uri("pack://application:,,,/Agri-bank_logo.png"));
             const double branchInfoWidth = 260;
@@ -147,23 +149,23 @@ public sealed class PrintService
             var provinceLine = $"مدیریت بانک کشاورزی استان {Dash(settings.ProvinceName)}";
             var branchLine = $"شعبه {Dash(settings.BranchName)} ـ کد {Dash(settings.PrintBranchCode)}";
             var printDate = DateTime.Now.ToString("yyyy/MM/dd HH:mm", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
-            AddAt(page, CreateTextBlock(provinceLine, branchInfoWidth, 17, 9.2, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft), branchInfoX, 99);
-            AddAt(page, CreateTextBlock(branchLine, branchInfoWidth, 17, 9.0, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft), branchInfoX, 116);
+            AddAt(page, CreateTextBlock(provinceLine, branchInfoWidth, 17, fontSize * 1.1, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft, printFont), branchInfoX, 99);
+            AddAt(page, CreateTextBlock(branchLine, branchInfoWidth, 17, fontSize * 1.08, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft, printFont), branchInfoX, 116);
             // Keep the print timestamp directly below the report title, on the left side.
             AddAt(page, CreateTextBlock($"تاریخ چاپ: {printDate}", innerWidth - branchInfoWidth - 16, 15, 7.8,
-                FontWeights.Normal, TextAlignment.Left, FlowDirection.LeftToRight), margin, 42);
+                FontWeights.Normal, TextAlignment.Left, FlowDirection.LeftToRight, printFont), margin, 42);
 
             var line1 = $"صاحب حساب: {Dash(header.CustomerName)}     شبا: {Dash(header.Iban)}";
             var line2 = $"بازه گزارش: {Dash(header.ReportPeriod)}     کد شعبه صورت‌حساب: {Dash(header.BranchCode)}     تاریخ دریافت: {Dash(header.ReceivedDate)}";
             var line3 = $"مانده آغازین: {header.OpeningBalance.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}     مانده پایانی: {header.ClosingBalance.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}     تعداد رکوردها: {transactions.Count:N0}";
             // Report metadata occupies the left side beside the logo/branch block,
             // removing the unused vertical gap above the table.
-            AddAt(page, CreateTextBlock(line1, innerWidth - branchInfoWidth - 16, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 76);
-            AddAt(page, CreateTextBlock(line2, innerWidth - branchInfoWidth - 16, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 94);
-            AddAt(page, CreateTextBlock(line3, innerWidth - branchInfoWidth - 16, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 112);
+            AddAt(page, CreateTextBlock(line1, innerWidth - branchInfoWidth - 16, 16, fontSize * 0.94, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft, printFont), margin, 76);
+            AddAt(page, CreateTextBlock(line2, innerWidth - branchInfoWidth - 16, 16, fontSize * 0.94, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft, printFont), margin, 94);
+            AddAt(page, CreateTextBlock(line3, innerWidth - branchInfoWidth - 16, 16, fontSize * 0.94, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft, printFont), margin, 112);
 
             var tableHeader = CreateGridRow(columns.Select(c => c.Header).ToList(), columns, columnWidths,
-                tableHeaderHeight, 8.5, true, false);
+                tableHeaderHeight, fontSize, true, false, printFont);
             AddAt(page, tableHeader, margin, headerY);
 
             var currentY = rowStartY;
@@ -172,14 +174,14 @@ public sealed class PrintService
                 var row = measuredRows[rowIndex];
                 var rowElement = CreateGridRow(
                     columns.Select(c => c.DisplayText(row.Transaction)).ToList(), columns, columnWidths,
-                    row.Height, fontSize, false, rowIndex % 2 == 1);
+                    row.Height, fontSize, false, rowIndex % 2 == 1, printFont);
                 AddAt(page, rowElement, margin, currentY);
                 currentY += row.Height;
             }
 
             var footer = CreateTextBlock(
                 $"تعداد رکوردها: {transactions.Count:N0}     صفحه {pageIndex + 1:N0} از {pages.Count:N0}",
-                innerWidth, 18, 8.0, FontWeights.Bold, TextAlignment.Left, FlowDirection.RightToLeft);
+                innerWidth, 18, fontSize * 0.96, FontWeights.Bold, TextAlignment.Left, FlowDirection.RightToLeft, printFont);
             AddAt(page, footer, margin, footerY);
 
             var pageContent = new PageContent();
@@ -220,7 +222,8 @@ public sealed class PrintService
         IReadOnlyList<TransactionColumnDefinition> columns,
         IReadOnlyList<double> widths,
         double fontSize,
-        double maximumHeight)
+        double maximumHeight,
+        FontFamily fontFamily)
     {
         var measuredHeight = 18d;
         for (var i = 0; i < columns.Count; i++)
@@ -228,7 +231,7 @@ public sealed class PrintService
             var availableWidth = Math.Max(8, widths[i] - 8);
             if (columns[i].Key == "Description")
             {
-                var description = CreateDescriptionPanel(columns[i].DisplayText(transaction), availableWidth, fontSize);
+                var description = CreateDescriptionPanel(columns[i].DisplayText(transaction), availableWidth, fontSize, fontFamily);
                 description.Measure(new Size(availableWidth, double.PositiveInfinity));
                 measuredHeight = Math.Max(measuredHeight, description.DesiredSize.Height + 6);
                 continue;
@@ -236,7 +239,7 @@ public sealed class PrintService
 
             var text = TransactionColumnDefinition.MakeBreakable(columns[i].DisplayText(transaction));
             var block = CreateTextBlock(text, availableWidth, double.NaN, fontSize,
-                FontWeights.Normal, AlignmentFor(columns[i]), FlowDirectionFor(columns[i]));
+                FontWeights.Normal, AlignmentFor(columns[i]), FlowDirectionFor(columns[i]), fontFamily);
             block.TextWrapping = TextWrapping.Wrap;
             block.Measure(new Size(availableWidth, double.PositiveInfinity));
             measuredHeight = Math.Max(measuredHeight, block.DesiredSize.Height + 6);
@@ -274,7 +277,8 @@ public sealed class PrintService
         double height,
         double fontSize,
         bool isHeader,
-        bool alternate)
+        bool alternate,
+        FontFamily fontFamily)
     {
         var totalWidth = widths.Sum();
         var grid = new Grid
@@ -293,7 +297,7 @@ public sealed class PrintService
             UIElement cellContent;
             if (!isHeader && column.Key == "Description")
             {
-                cellContent = CreateDescriptionPanel(values[i], Math.Max(8, widths[i] - 8), fontSize);
+                cellContent = CreateDescriptionPanel(values[i], Math.Max(8, widths[i] - 8), fontSize, fontFamily);
             }
             else
             {
@@ -301,7 +305,7 @@ public sealed class PrintService
                 var text = CreateTextBlock(value, Math.Max(8, widths[i] - 8), double.NaN, fontSize,
                     isHeader ? FontWeights.Bold : FontWeights.Normal,
                     isHeader ? TextAlignment.Center : AlignmentFor(column),
-                    isHeader ? FlowDirection.RightToLeft : FlowDirectionFor(column));
+                    isHeader ? FlowDirection.RightToLeft : FlowDirectionFor(column), fontFamily);
                 text.TextWrapping = TextWrapping.Wrap;
                 text.VerticalAlignment = VerticalAlignment.Center;
                 text.ClipToBounds = true;
@@ -330,13 +334,14 @@ public sealed class PrintService
         double fontSize,
         FontWeight weight,
         TextAlignment alignment,
-        FlowDirection flowDirection)
+        FlowDirection flowDirection,
+        FontFamily? fontFamily = null)
     {
         var block = new TextBlock
         {
             Text = text ?? string.Empty,
             Width = width,
-            FontFamily = PrintFont,
+            FontFamily = fontFamily ?? PrintFont,
             FontSize = fontSize,
             FontWeight = weight,
             TextAlignment = alignment,
@@ -353,7 +358,7 @@ public sealed class PrintService
     /// Renders each description line as a two-column row: Persian labels on the
     /// right and their associated values (usually numbers) on the left.
     /// </summary>
-    private static StackPanel CreateDescriptionPanel(string? description, double width, double fontSize)
+    private static StackPanel CreateDescriptionPanel(string? description, double width, double fontSize, FontFamily fontFamily)
     {
         var panel = new StackPanel
         {
@@ -385,12 +390,12 @@ public sealed class PrintService
             // For WPF RTL TextBlocks, Left alignment places Persian glyphs against
             // the physical right edge of this RTL label column.
             var label = CreateTextBlock(labelText, double.NaN, double.NaN, fontSize,
-                FontWeights.Normal, TextAlignment.Left, FlowDirection.RightToLeft);
+                FontWeights.Normal, TextAlignment.Left, FlowDirection.RightToLeft, fontFamily);
             label.TextWrapping = TextWrapping.Wrap;
             label.VerticalAlignment = VerticalAlignment.Center;
 
             var value = CreateTextBlock(valueText, double.NaN, double.NaN, fontSize,
-                FontWeights.Normal, TextAlignment.Left, FlowDirection.LeftToRight);
+                FontWeights.Normal, TextAlignment.Left, FlowDirection.LeftToRight, fontFamily);
             value.TextWrapping = TextWrapping.Wrap;
             value.VerticalAlignment = VerticalAlignment.Center;
 
