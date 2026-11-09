@@ -13,7 +13,7 @@ public partial class SettingsWindow : Window
     public IReadOnlyList<string> Fonts => BankStatementViewer.ViewModels.MainViewModel.AvailableFontFamilies;
     public IReadOnlyList<string> RowHeights { get; } = new[] { "خودکار", "کم", "متوسط", "زیاد" };
     public IReadOnlyList<double> DisplayFontSizes { get; } = Enumerable.Range(9, 10).Select(x => (double)x).ToArray();
-    public IReadOnlyList<double> PrintFontSizes { get; } = Enumerable.Range(7, 8).Select(x => (double)x).ToArray();
+    public IReadOnlyList<double> PrintFontSizes { get; } = new[] { 7d, 7.5d, 8d, 8.3d, 8.5d, 9d, 9.5d, 10d, 11d, 12d, 13d, 14d };
 
     public SettingsWindow(AppSettings settings)
     {
