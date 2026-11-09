@@ -113,8 +113,6 @@
                     ToolTip="چاپ صورت‌حساب در حالت عمودی" AutomationProperties.Name="چاپ عمودی" />
             <Button x:Name="PrintLandscapeButton" Style="{StaticResource IconButtonStyle}" Content="▱" FontFamily="Segoe UI Symbol" FontSize="22" Click="PrintLandscape_Click"
                     ToolTip="چاپ صورت‌حساب در حالت افقی" AutomationProperties.Name="چاپ افقی" />
-            <Button Style="{StaticResource IconButtonStyle}" Content="&#xE8FD;" Click="DisplayColumns_Click"
-                    ToolTip="انتخاب ستون‌هایی که در جدول اصلی نمایش داده شوند" AutomationProperties.Name="ستون‌های نمایش" />
 
             <Button Style="{StaticResource IconButtonStyle}" Content="&#xE9D2;" Click="QuickSummary_Click"
                     ToolTip="نمایش خلاصه کانال‌ها، روزها و تراکنش‌های بزرگ" AutomationProperties.Name="خلاصه سریع" />
