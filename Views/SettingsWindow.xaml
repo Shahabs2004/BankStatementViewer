@@ -20,6 +20,9 @@
                 <CheckBox x:Name="AutoFitCheck" Content="تنظیم خودکار عرض ستون‌ها" Margin="4"/>
                 <CheckBox x:Name="HideFeesCheck" Content="پنهان‌کردن ردیف‌های کارمزد" Margin="4"/>
                 <DockPanel Margin="4"><TextBlock Text="فونت نمایش" VerticalAlignment="Center" Width="125"/><ComboBox x:Name="FontCombo" ItemsSource="{Binding Fonts}" /></DockPanel>
+                <DockPanel Margin="4"><TextBlock Text="اندازه فونت نمایش" VerticalAlignment="Center" Width="125"/><ComboBox x:Name="DisplayFontSizeCombo" ItemsSource="{Binding DisplayFontSizes}" /></DockPanel>
+                <DockPanel Margin="4"><TextBlock Text="فونت چاپ" VerticalAlignment="Center" Width="125"/><ComboBox x:Name="PrintFontCombo" ItemsSource="{Binding Fonts}" /></DockPanel>
+                <DockPanel Margin="4"><TextBlock Text="اندازه فونت چاپ" VerticalAlignment="Center" Width="125"/><ComboBox x:Name="PrintFontSizeCombo" ItemsSource="{Binding PrintFontSizes}" /></DockPanel>
                 <DockPanel Margin="4"><TextBlock Text="ارتفاع ردیف" VerticalAlignment="Center" Width="125"/><ComboBox x:Name="RowHeightCombo" ItemsSource="{Binding RowHeights}"/></DockPanel>
             </StackPanel>
         </GroupBox>
