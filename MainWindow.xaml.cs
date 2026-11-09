@@ -23,6 +23,7 @@ public partial class MainWindow : Window
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         ApplyGridColumnSettings();
+        ApplyGridLineSettings();
         // Do not prompt for a statement file at startup. The user can open a local file or read from FTP.
     }
 
@@ -42,6 +43,27 @@ public partial class MainWindow : Window
             : "نمایش فیلترها و مشخصات حساب";
         TogglePanelsButton.ToolTip = hint;
         System.Windows.Automation.AutomationProperties.SetName(TogglePanelsButton, hint);
+    }
+
+    private void FullSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SettingsWindow(ViewModel.SettingsSnapshot) { Owner = this };
+        if (dialog.ShowDialog() == true)
+        {
+            try { ViewModel.ApplyFullSettings(dialog.Settings); ApplyGridColumnSettings(); ApplyGridLineSettings(); }
+            catch (Exception ex) { MessageBox.Show(this, $"ذخیره تنظیمات ناموفق بود:\\n{ex.Message}", "تنظیمات کامل", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+    }
+
+    private void ApplyGridLineSettings()
+    {
+        if (TransactionsGrid is null) return;
+        var settings = ViewModel.SettingsSnapshot;
+        TransactionsGrid.GridLinesVisibility = settings.ShowVerticalGridLines && settings.ShowHorizontalGridLines
+            ? System.Windows.Controls.DataGridGridLinesVisibility.All
+            : settings.ShowVerticalGridLines ? System.Windows.Controls.DataGridGridLinesVisibility.Vertical
+            : settings.ShowHorizontalGridLines ? System.Windows.Controls.DataGridGridLinesVisibility.Horizontal
+            : System.Windows.Controls.DataGridGridLinesVisibility.None;
     }
 
     private void About_Click(object sender, RoutedEventArgs e)
@@ -330,7 +352,7 @@ public partial class MainWindow : Window
         SetBusy(true, "در حال آماده‌سازی چاپ...");
         try
         {
-            await _printService.PrintAsync(header, transactions, landscape, selectedPrintColumns);
+            await _printService.PrintAsync(header, transactions, landscape, selectedPrintColumns, ViewModel.SettingsSnapshot);
         }
         catch (Exception ex)
         {
@@ -353,7 +375,7 @@ public partial class MainWindow : Window
     private void SetBusy(bool busy, string status = "", bool indeterminate = true)
     {
         OpenFileButton.IsEnabled = !busy;
-        FtpSettingsButton.IsEnabled = !busy;
+        FullSettingsButton.IsEnabled = !busy;
         ReadFtpButton.IsEnabled = !busy;
         ExportExcelButton.IsEnabled = !busy;
         PrintPortraitButton.IsEnabled = !busy;
