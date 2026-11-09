@@ -147,6 +147,26 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public bool CanUseDepositAmountFilter => !(Filters.TypeFilterEnabled && Filters.TypeFilterMode == "برداشت");
     public bool CanUseWithdrawalAmountFilter => !(Filters.TypeFilterEnabled && Filters.TypeFilterMode == "واریز");
     public string SettingsPath => _settingsService.SettingsPath;
+    public AppSettings SettingsSnapshot => System.Text.Json.JsonSerializer.Deserialize<AppSettings>(System.Text.Json.JsonSerializer.Serialize(_settings))!;
+
+    public void ApplyFullSettings(AppSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        _settings.ProvinceName = settings.ProvinceName?.Trim() ?? string.Empty;
+        _settings.BranchName = settings.BranchName?.Trim() ?? string.Empty;
+        _settings.PrintBranchCode = settings.PrintBranchCode?.Trim() ?? string.Empty;
+        _settings.ShowVerticalGridLines = settings.ShowVerticalGridLines;
+        _settings.ShowHorizontalGridLines = settings.ShowHorizontalGridLines;
+        _settings.FontFamilyName = AvailableFontFamilies.Contains(settings.FontFamilyName) ? settings.FontFamilyName : "Tahoma";
+        _settings.AutoFitColumns = settings.AutoFitColumns;
+        _settings.HideFeeRows = settings.HideFeeRows;
+        _settings.RowHeightOption = AvailableRowHeightOptions.Contains(settings.RowHeightOption) ? settings.RowHeightOption : "خودکار";
+        _fontFamilyName = _settings.FontFamilyName; _autoFitColumns = _settings.AutoFitColumns;
+        _hideFeeRows = _settings.HideFeeRows; _rowHeightOption = _settings.RowHeightOption;
+        OnPropertyChanged(nameof(FontFamilyName)); OnPropertyChanged(nameof(AutoFitColumns));
+        OnPropertyChanged(nameof(HideFeeRows)); OnPropertyChanged(nameof(RowHeightOption));
+        SaveSettings(); ScheduleApplyFilters();
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
