@@ -358,7 +358,7 @@ public sealed class PrintService
         };
 
         var lines = (description ?? string.Empty)
-            .Split(new[] { "\\r\\n", "\\n", "\\r" }, StringSplitOptions.RemoveEmptyEntries);
+            .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var rawLine in lines)
         {
