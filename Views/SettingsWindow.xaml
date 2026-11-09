@@ -1,0 +1,36 @@
+<Window x:Class="BankStatementViewer.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="تنظیمات کامل برنامه" Width="620" SizeToContent="Height" WindowStartupLocation="CenterOwner"
+        FlowDirection="RightToLeft" ResizeMode="NoResize" FontFamily="Tahoma">
+    <Grid Margin="16">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <GroupBox Header="مشخصات سازمانی و سربرگ چاپ" Padding="10" Margin="0,0,0,10">
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="125"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="نام استان" VerticalAlignment="Center" Margin="4"/><TextBox x:Name="ProvinceBox" Grid.Row="0" Grid.Column="1" Margin="4"/>
+                <TextBlock Grid.Row="1" Text="نام شعبه" VerticalAlignment="Center" Margin="4"/><TextBox x:Name="BranchBox" Grid.Row="1" Grid.Column="1" Margin="4"/>
+                <TextBlock Grid.Row="2" Text="کد شعبه" VerticalAlignment="Center" Margin="4"/><TextBox x:Name="BranchCodeBox" Grid.Row="2" Grid.Column="1" Margin="4"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="1" Header="تنظیمات نمایش گردش‌ها" Padding="10" Margin="0,0,0,10">
+            <StackPanel>
+                <CheckBox x:Name="VerticalLinesCheck" Content="نمایش خطوط عمودی جدول" Margin="4"/>
+                <CheckBox x:Name="HorizontalLinesCheck" Content="نمایش خطوط افقی جدول" Margin="4"/>
+                <CheckBox x:Name="AutoFitCheck" Content="تنظیم خودکار عرض ستون‌ها" Margin="4"/>
+                <CheckBox x:Name="HideFeesCheck" Content="پنهان‌کردن ردیف‌های کارمزد" Margin="4"/>
+                <DockPanel Margin="4"><TextBlock Text="فونت نمایش" VerticalAlignment="Center" Width="125"/><ComboBox x:Name="FontCombo" ItemsSource="{Binding Fonts}" /></DockPanel>
+                <DockPanel Margin="4"><TextBlock Text="ارتفاع ردیف" VerticalAlignment="Center" Width="125"/><ComboBox x:Name="RowHeightCombo" ItemsSource="{Binding RowHeights}"/></DockPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Header="اتصالات و دریافت صورت‌حساب" Padding="10" Margin="0,0,0,12">
+            <StackPanel><TextBlock Text="تنظیمات سرور، مسیر، نام کاربری و رمز عبور FTP" Margin="4"/>
+                <Button Content="باز کردن تنظیمات FTP" HorizontalAlignment="Right" MinWidth="170" Padding="8,4" Click="Ftp_Click"/>
+            </StackPanel>
+        </GroupBox>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Button Content="ذخیره تنظیمات" MinWidth="110" Margin="3" Padding="8,5" IsDefault="True" Click="Save_Click"/>
+            <Button Content="انصراف" MinWidth="90" Margin="3" Padding="8,5" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
