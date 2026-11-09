@@ -246,12 +246,16 @@
                       ToolTip="برای تنظیم ارتفاع یک ردیف، مرز پایین آن را با ماوس بکشید.">
                 <DataGrid.Resources>
                     <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        <Setter Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
                         <Setter Property="FontWeight" Value="Bold" />
                         <Setter Property="Background" Value="#E8EDF1" />
                         <Setter Property="Padding" Value="6,7" />
                         <Setter Property="HorizontalContentAlignment" Value="Center" />
                     </Style>
                     <Style TargetType="DataGridCell">
+                        <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        <Setter Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
                         <Setter Property="Padding" Value="4,3" />
                         <Setter Property="VerticalContentAlignment" Value="Center" />
                     </Style>
