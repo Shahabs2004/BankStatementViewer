@@ -241,7 +241,7 @@
                       CanUserSortColumns="True" CanUserResizeColumns="True" SelectionMode="Extended"
                       SelectionUnit="FullRow" HeadersVisibility="Column" GridLinesVisibility="All"
                       RowHeaderWidth="0" BorderBrush="#D5DDE3" BorderThickness="1"
-                      FlowDirection="RightToLeft" FontSize="{Binding DisplayFontSize}" CanUserResizeRows="True"
+                      FlowDirection="RightToLeft" FontFamily="{Binding FontFamilyName}" FontSize="{Binding DisplayFontSize}" CanUserResizeRows="True"
                       EnableRowVirtualization="True" VirtualizingPanel.IsVirtualizing="True"
                       ToolTip="برای تنظیم ارتفاع یک ردیف، مرز پایین آن را با ماوس بکشید.">
                 <DataGrid.Resources>

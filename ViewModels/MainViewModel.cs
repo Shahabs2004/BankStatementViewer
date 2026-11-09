@@ -285,6 +285,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
             _settings.DisplayColumns = _displayColumns.ToList();
             _settings.FontFamilyName = _fontFamilyName;
             _settings.DisplayFontSize = _displayFontSize;
+            _settings.PrintFontFamilyName = AvailableFontFamilies.Contains(_settings.PrintFontFamilyName) ? _settings.PrintFontFamilyName : "Tahoma";
+            _settings.PrintFontSize = Math.Clamp(_settings.PrintFontSize, 7, 14);
             _settings.AutoFitColumns = _autoFitColumns;
             _settings.HideFeeRows = _hideFeeRows;
             _settings.RowHeightOption = _rowHeightOption;
