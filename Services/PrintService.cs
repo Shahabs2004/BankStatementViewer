@@ -324,10 +324,14 @@ public sealed class PrintService
     }
 
     private static TextAlignment AlignmentFor(TransactionColumnDefinition column) =>
-        column.IsText ? TextAlignment.Right : TextAlignment.Center;
+        column.Key == "Description" || column.IsText
+            ? TextAlignment.Right
+            : TextAlignment.Center;
 
     private static FlowDirection FlowDirectionFor(TransactionColumnDefinition column) =>
-        column.IsText || column.Key == "TransactionType" ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+        column.Key == "Description" || column.IsText || column.Key == "TransactionType"
+            ? FlowDirection.RightToLeft
+            : FlowDirection.LeftToRight;
 
     private static void AddAt(FixedPage page, UIElement element, double left, double top)
     {

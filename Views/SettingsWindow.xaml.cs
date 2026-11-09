@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Collections.ObjectModel;
 using BankStatementViewer.Models;
 using BankStatementViewer.Services;
 
@@ -8,6 +9,7 @@ public partial class SettingsWindow : Window
 {
     private readonly FtpStatementService _ftpService = new();
     public AppSettings Settings { get; private set; }
+    public ObservableCollection<TransactionColumnOption> DisplayColumns { get; } = new();
     public IReadOnlyList<string> Fonts => BankStatementViewer.ViewModels.MainViewModel.AvailableFontFamilies;
     public IReadOnlyList<string> RowHeights { get; } = new[] { "خودکار", "کم", "متوسط", "زیاد" };
 
@@ -15,6 +17,9 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         Settings = settings;
+        var selectedColumns = new HashSet<string>(settings.DisplayColumns ?? new List<string>(), StringComparer.Ordinal);
+        foreach (var column in TransactionColumnCatalog.All)
+            DisplayColumns.Add(new TransactionColumnOption(column.Key, column.Header, selectedColumns.Contains(column.Key)));
         DataContext = this;
         ProvinceBox.Text = settings.ProvinceName;
         BranchBox.Text = settings.BranchName;
@@ -39,6 +44,14 @@ public partial class SettingsWindow : Window
 
     private void Save_Click(object sender, RoutedEventArgs e)
     {
+        var selectedColumns = DisplayColumns.Where(column => column.IsSelected).Select(column => column.Key).ToList();
+        if (selectedColumns.Count == 0)
+        {
+            MessageBox.Show(this, "حداقل یک ستون برای نمایش در جدول اصلی انتخاب کنید.", "تنظیم ستون‌ها", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        Settings.DisplayColumns = selectedColumns;
         Settings.ProvinceName = ProvinceBox.Text.Trim();
         Settings.BranchName = BranchBox.Text.Trim();
         Settings.PrintBranchCode = BranchCodeBox.Text.Trim();

@@ -163,25 +163,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void DisplayColumns_Click(object sender, RoutedEventArgs e)
-    {
-        var columnDialog = new ColumnSelectionDialog(forPrint: false, previousSelection: ViewModel.DisplayColumns, forDisplay: true)
-        {
-            Owner = this
-        };
-        if (columnDialog.ShowDialog() != true) return;
-
-        try
-        {
-            ViewModel.SetDisplayColumns(columnDialog.SelectedKeys);
-            ApplyGridColumnSettings();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(this, $"ذخیره ستون‌های نمایش ناموفق بود:\n{ex.Message}", "تنظیم ستون‌ها", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
     private void AutoFitColumns_Changed(object sender, RoutedEventArgs e)
     {
         if (sender is System.Windows.Controls.CheckBox checkBox && checkBox.IsChecked is bool isChecked && ViewModel.AutoFitColumns != isChecked)
