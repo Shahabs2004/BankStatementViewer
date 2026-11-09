@@ -161,6 +161,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _settings.AutoFitColumns = settings.AutoFitColumns;
         _settings.HideFeeRows = settings.HideFeeRows;
         _settings.RowHeightOption = AvailableRowHeightOptions.Contains(settings.RowHeightOption) ? settings.RowHeightOption : "خودکار";
+        if (settings.DisplayColumns is { Count: > 0 })
+            SetDisplayColumns(settings.DisplayColumns);
         _fontFamilyName = _settings.FontFamilyName; _autoFitColumns = _settings.AutoFitColumns;
         _hideFeeRows = _settings.HideFeeRows; _rowHeightOption = _settings.RowHeightOption;
         OnPropertyChanged(nameof(FontFamilyName)); OnPropertyChanged(nameof(AutoFitColumns));
