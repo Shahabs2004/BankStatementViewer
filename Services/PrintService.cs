@@ -324,9 +324,11 @@ public sealed class PrintService
     }
 
     private static TextAlignment AlignmentFor(TransactionColumnDefinition column) =>
-        column.Key == "Description" || column.IsText
-            ? TextAlignment.Right
-            : TextAlignment.Center;
+        column.Key == "Description"
+            ? TextAlignment.Left // With RTL FlowDirection, WPF mirrors the cell's layout coordinates.
+            : column.IsText
+                ? TextAlignment.Right
+                : TextAlignment.Center;
 
     private static FlowDirection FlowDirectionFor(TransactionColumnDefinition column) =>
         column.Key == "Description" || column.IsText || column.Key == "TransactionType"
