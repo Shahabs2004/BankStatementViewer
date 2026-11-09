@@ -99,7 +99,7 @@ public sealed class PrintService
         AppSettings settings)
     {
         const double margin = 16;
-        const double headerY = 132;
+        const double headerY = 190;
         const double tableHeaderHeight = 27;
         const double footerReserve = 28;
         var innerWidth = Math.Max(100, pageWidth - 2 * margin);
@@ -128,31 +128,35 @@ public sealed class PrintService
                 TextAlignment.Center, FlowDirection.RightToLeft), margin, 8);
 
             var logoStream = Application.GetResourceStream(new Uri("pack://application:,,,/Agri-bank_logo.png"));
+            const double branchInfoWidth = 260;
+            const double logoWidth = 81;
+            const double logoHeight = 93;
+            var branchInfoX = margin + innerWidth - branchInfoWidth;
             if (logoStream is not null)
             {
                 using (logoStream.Stream)
                 {
                     var bitmap = new System.Windows.Media.Imaging.BitmapImage();
                     bitmap.BeginInit(); bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                    bitmap.StreamSource = logoStream.Stream; bitmap.DecodePixelHeight = 72; bitmap.EndInit(); bitmap.Freeze();
-                    var logo = new Image { Source = bitmap, Width = 54, Height = 62, Stretch = Stretch.Uniform };
-                    AddAt(page, logo, margin + innerWidth - 58, 5);
+                    bitmap.StreamSource = logoStream.Stream; bitmap.DecodePixelHeight = 108; bitmap.EndInit(); bitmap.Freeze();
+                    var logo = new Image { Source = bitmap, Width = logoWidth, Height = logoHeight, Stretch = Stretch.Uniform };
+                    AddAt(page, logo, branchInfoX + (branchInfoWidth - logoWidth) / 2, 3);
                 }
             }
 
             var provinceLine = $"مدیریت بانک کشاورزی استان {Dash(settings.ProvinceName)}";
-            var branchLine = $"شعبه {Dash(settings.BranchName)}  کد {Dash(settings.PrintBranchCode)}";
+            var branchLine = $"شعبه {Dash(settings.BranchName)} ـ کد {Dash(settings.PrintBranchCode)}";
             var printDate = DateTime.Now.ToString("yyyy/MM/dd HH:mm", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
-            AddAt(page, CreateTextBlock(provinceLine, innerWidth - 70, 17, 9.2, FontWeights.Bold, TextAlignment.Right, FlowDirection.RightToLeft), margin, 34);
-            AddAt(page, CreateTextBlock(branchLine, innerWidth - 70, 17, 9.0, FontWeights.Bold, TextAlignment.Right, FlowDirection.RightToLeft), margin, 51);
-            AddAt(page, CreateTextBlock($"تاریخ چاپ: {printDate}", innerWidth, 15, 7.8, FontWeights.Normal, TextAlignment.Left, FlowDirection.RightToLeft), margin, 70);
+            AddAt(page, CreateTextBlock(provinceLine, branchInfoWidth, 17, 9.2, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft), branchInfoX, 99);
+            AddAt(page, CreateTextBlock(branchLine, branchInfoWidth, 17, 9.0, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft), branchInfoX, 116);
+            AddAt(page, CreateTextBlock($"تاریخ چاپ: {printDate}", innerWidth - branchInfoWidth - 8, 15, 7.8, FontWeights.Normal, TextAlignment.Left, FlowDirection.RightToLeft), margin, 70);
 
             var line1 = $"صاحب حساب: {Dash(header.CustomerName)}     شبا: {Dash(header.Iban)}";
             var line2 = $"بازه گزارش: {Dash(header.ReportPeriod)}     کد شعبه صورت‌حساب: {Dash(header.BranchCode)}     تاریخ دریافت: {Dash(header.ReceivedDate)}";
             var line3 = $"مانده آغازین: {header.OpeningBalance.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}     مانده پایانی: {header.ClosingBalance.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}     تعداد رکوردها: {transactions.Count:N0}";
-            AddAt(page, CreateTextBlock(line1, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 86);
-            AddAt(page, CreateTextBlock(line2, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 102);
-            AddAt(page, CreateTextBlock(line3, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 118);
+            AddAt(page, CreateTextBlock(line1, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 138);
+            AddAt(page, CreateTextBlock(line2, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 154);
+            AddAt(page, CreateTextBlock(line3, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 170);
 
             var tableHeader = CreateGridRow(columns.Select(c => c.Header).ToList(), columns, columnWidths,
                 tableHeaderHeight, 8.5, true, false);
@@ -217,11 +221,20 @@ public sealed class PrintService
         var measuredHeight = 18d;
         for (var i = 0; i < columns.Count; i++)
         {
+            var availableWidth = Math.Max(8, widths[i] - 8);
+            if (columns[i].Key == "Description")
+            {
+                var description = CreateDescriptionPanel(columns[i].DisplayText(transaction), availableWidth, fontSize);
+                description.Measure(new Size(availableWidth, double.PositiveInfinity));
+                measuredHeight = Math.Max(measuredHeight, description.DesiredSize.Height + 6);
+                continue;
+            }
+
             var text = TransactionColumnDefinition.MakeBreakable(columns[i].DisplayText(transaction));
-            var block = CreateTextBlock(text, Math.Max(8, widths[i] - 8), double.NaN, fontSize,
+            var block = CreateTextBlock(text, availableWidth, double.NaN, fontSize,
                 FontWeights.Normal, AlignmentFor(columns[i]), FlowDirectionFor(columns[i]));
             block.TextWrapping = TextWrapping.Wrap;
-            block.Measure(new Size(Math.Max(8, widths[i] - 8), double.PositiveInfinity));
+            block.Measure(new Size(availableWidth, double.PositiveInfinity));
             measuredHeight = Math.Max(measuredHeight, block.DesiredSize.Height + 6);
         }
         return Math.Min(Math.Max(18, Math.Ceiling(measuredHeight)), maximumHeight);
@@ -273,14 +286,23 @@ public sealed class PrintService
         for (var i = 0; i < columns.Count; i++)
         {
             var column = columns[i];
-            var value = isHeader ? values[i] : TransactionColumnDefinition.MakeBreakable(values[i]);
-            var text = CreateTextBlock(value, Math.Max(8, widths[i] - 8), double.NaN, fontSize,
-                isHeader ? FontWeights.Bold : FontWeights.Normal,
-                isHeader ? TextAlignment.Center : AlignmentFor(column),
-                isHeader ? FlowDirection.RightToLeft : FlowDirectionFor(column));
-            text.TextWrapping = TextWrapping.Wrap;
-            text.VerticalAlignment = VerticalAlignment.Center;
-            text.ClipToBounds = true;
+            UIElement cellContent;
+            if (!isHeader && column.Key == "Description")
+            {
+                cellContent = CreateDescriptionPanel(values[i], Math.Max(8, widths[i] - 8), fontSize);
+            }
+            else
+            {
+                var value = isHeader ? values[i] : TransactionColumnDefinition.MakeBreakable(values[i]);
+                var text = CreateTextBlock(value, Math.Max(8, widths[i] - 8), double.NaN, fontSize,
+                    isHeader ? FontWeights.Bold : FontWeights.Normal,
+                    isHeader ? TextAlignment.Center : AlignmentFor(column),
+                    isHeader ? FlowDirection.RightToLeft : FlowDirectionFor(column));
+                text.TextWrapping = TextWrapping.Wrap;
+                text.VerticalAlignment = VerticalAlignment.Center;
+                text.ClipToBounds = true;
+                cellContent = text;
+            }
 
             var border = new Border
             {
@@ -288,7 +310,7 @@ public sealed class PrintService
                 BorderThickness = new Thickness(0.35),
                 Padding = new Thickness(3, 1, 3, 1),
                 Background = isHeader ? HeaderBrush : alternate ? AlternateBrush : Brushes.White,
-                Child = text,
+                Child = cellContent,
                 ClipToBounds = true
             };
             Grid.SetColumn(border, i);
@@ -321,6 +343,59 @@ public sealed class PrintService
         };
         if (!double.IsNaN(height) && height > 0) block.Height = height;
         return block;
+    }
+
+    /// <summary>
+    /// Renders each description line as a two-column row: Persian labels on the
+    /// right and their associated values (usually numbers) on the left.
+    /// </summary>
+    private static StackPanel CreateDescriptionPanel(string? description, double width, double fontSize)
+    {
+        var panel = new StackPanel
+        {
+            Width = width,
+            FlowDirection = FlowDirection.RightToLeft
+        };
+
+        var lines = (description ?? string.Empty)
+            .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var rawLine in lines)
+        {
+            var line = rawLine.Trim();
+            if (line.Length == 0) continue;
+
+            var separator = line.IndexOfAny(new[] { ':', '：' });
+            var row = new Grid
+            {
+                Width = width,
+                MinHeight = fontSize + 3,
+                FlowDirection = FlowDirection.RightToLeft
+            };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(58, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(42, GridUnitType.Star) });
+
+            var labelText = separator >= 0 ? line.Substring(0, separator).Trim() : line;
+            var valueText = separator >= 0 ? line.Substring(separator + 1).Trim() : string.Empty;
+
+            var label = CreateTextBlock(labelText, double.NaN, double.NaN, fontSize,
+                FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft);
+            label.TextWrapping = TextWrapping.Wrap;
+            label.VerticalAlignment = VerticalAlignment.Center;
+
+            var value = CreateTextBlock(valueText, double.NaN, double.NaN, fontSize,
+                FontWeights.Normal, TextAlignment.Left, FlowDirection.LeftToRight);
+            value.TextWrapping = TextWrapping.Wrap;
+            value.VerticalAlignment = VerticalAlignment.Center;
+
+            Grid.SetColumn(label, 0);
+            Grid.SetColumn(value, 1);
+            row.Children.Add(label);
+            row.Children.Add(value);
+            panel.Children.Add(row);
+        }
+
+        return panel;
     }
 
     private static TextAlignment AlignmentFor(TransactionColumnDefinition column) =>
