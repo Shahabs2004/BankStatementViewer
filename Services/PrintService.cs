@@ -99,7 +99,7 @@ public sealed class PrintService
         AppSettings settings)
     {
         const double margin = 16;
-        const double headerY = 190;
+        const double headerY = 145;
         const double tableHeaderHeight = 27;
         const double footerReserve = 28;
         var innerWidth = Math.Max(100, pageWidth - 2 * margin);
@@ -149,14 +149,18 @@ public sealed class PrintService
             var printDate = DateTime.Now.ToString("yyyy/MM/dd HH:mm", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
             AddAt(page, CreateTextBlock(provinceLine, branchInfoWidth, 17, 9.2, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft), branchInfoX, 99);
             AddAt(page, CreateTextBlock(branchLine, branchInfoWidth, 17, 9.0, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft), branchInfoX, 116);
-            AddAt(page, CreateTextBlock($"تاریخ چاپ: {printDate}", innerWidth - branchInfoWidth - 8, 15, 7.8, FontWeights.Normal, TextAlignment.Left, FlowDirection.RightToLeft), margin, 70);
+            // Keep the print timestamp directly below the report title, on the left side.
+            AddAt(page, CreateTextBlock($"تاریخ چاپ: {printDate}", innerWidth - branchInfoWidth - 16, 15, 7.8,
+                FontWeights.Normal, TextAlignment.Left, FlowDirection.LeftToRight), margin, 42);
 
             var line1 = $"صاحب حساب: {Dash(header.CustomerName)}     شبا: {Dash(header.Iban)}";
             var line2 = $"بازه گزارش: {Dash(header.ReportPeriod)}     کد شعبه صورت‌حساب: {Dash(header.BranchCode)}     تاریخ دریافت: {Dash(header.ReceivedDate)}";
             var line3 = $"مانده آغازین: {header.OpeningBalance.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}     مانده پایانی: {header.ClosingBalance.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}     تعداد رکوردها: {transactions.Count:N0}";
-            AddAt(page, CreateTextBlock(line1, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 138);
-            AddAt(page, CreateTextBlock(line2, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 154);
-            AddAt(page, CreateTextBlock(line3, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 170);
+            // Report metadata occupies the left side beside the logo/branch block,
+            // removing the unused vertical gap above the table.
+            AddAt(page, CreateTextBlock(line1, innerWidth - branchInfoWidth - 16, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 76);
+            AddAt(page, CreateTextBlock(line2, innerWidth - branchInfoWidth - 16, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 94);
+            AddAt(page, CreateTextBlock(line3, innerWidth - branchInfoWidth - 16, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 112);
 
             var tableHeader = CreateGridRow(columns.Select(c => c.Header).ToList(), columns, columnWidths,
                 tableHeaderHeight, 8.5, true, false);
@@ -378,8 +382,10 @@ public sealed class PrintService
             var labelText = separator >= 0 ? line.Substring(0, separator).Trim() : line;
             var valueText = separator >= 0 ? line.Substring(separator + 1).Trim() : string.Empty;
 
+            // For WPF RTL TextBlocks, Left alignment places Persian glyphs against
+            // the physical right edge of this RTL label column.
             var label = CreateTextBlock(labelText, double.NaN, double.NaN, fontSize,
-                FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft);
+                FontWeights.Normal, TextAlignment.Left, FlowDirection.RightToLeft);
             label.TextWrapping = TextWrapping.Wrap;
             label.VerticalAlignment = VerticalAlignment.Center;
 
