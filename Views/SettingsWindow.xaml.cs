@@ -12,6 +12,8 @@ public partial class SettingsWindow : Window
     public ObservableCollection<TransactionColumnOption> DisplayColumns { get; } = new();
     public IReadOnlyList<string> Fonts => BankStatementViewer.ViewModels.MainViewModel.AvailableFontFamilies;
     public IReadOnlyList<string> RowHeights { get; } = new[] { "خودکار", "کم", "متوسط", "زیاد" };
+    public IReadOnlyList<double> DisplayFontSizes { get; } = Enumerable.Range(9, 10).Select(x => (double)x).ToArray();
+    public IReadOnlyList<double> PrintFontSizes { get; } = new[] { 7d, 7.5d, 8d, 8.3d, 8.5d, 9d, 9.5d, 10d, 11d, 12d, 13d, 14d };
 
     public SettingsWindow(AppSettings settings)
     {
@@ -29,6 +31,9 @@ public partial class SettingsWindow : Window
         AutoFitCheck.IsChecked = settings.AutoFitColumns;
         HideFeesCheck.IsChecked = settings.HideFeeRows;
         FontCombo.SelectedItem = settings.FontFamilyName;
+        DisplayFontSizeCombo.SelectedItem = settings.DisplayFontSize;
+        PrintFontCombo.SelectedItem = settings.PrintFontFamilyName;
+        PrintFontSizeCombo.SelectedItem = settings.PrintFontSize;
         RowHeightCombo.SelectedItem = settings.RowHeightOption;
     }
 
@@ -60,6 +65,9 @@ public partial class SettingsWindow : Window
         Settings.AutoFitColumns = AutoFitCheck.IsChecked == true;
         Settings.HideFeeRows = HideFeesCheck.IsChecked == true;
         Settings.FontFamilyName = FontCombo.SelectedItem as string ?? "Tahoma";
+        Settings.DisplayFontSize = DisplayFontSizeCombo.SelectedItem is double displaySize ? displaySize : 11;
+        Settings.PrintFontFamilyName = PrintFontCombo.SelectedItem as string ?? "Tahoma";
+        Settings.PrintFontSize = PrintFontSizeCombo.SelectedItem is double printSize ? printSize : 8.3;
         Settings.RowHeightOption = RowHeightCombo.SelectedItem as string ?? "خودکار";
         DialogResult = true;
     }

@@ -10,6 +10,9 @@ public sealed class AppSettings
         "Balance", "BranchCode", "Tracking", "OtherAccount", "Purpose", "Description"
     };
     public string FontFamilyName { get; set; } = "Tahoma";
+    public double DisplayFontSize { get; set; } = 11;
+    public string PrintFontFamilyName { get; set; } = "Tahoma";
+    public double PrintFontSize { get; set; } = 8.3;
     public bool AutoFitColumns { get; set; } = true;
     public bool HideFeeRows { get; set; }
     public string RowHeightOption { get; set; } = "خودکار";

@@ -19,6 +19,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private string _summaryText = "ابتدا یک فایل صورت‌حساب انتخاب کنید.";
     private string _settingsStatus = string.Empty;
     private string _fontFamilyName = "Tahoma";
+    private double _displayFontSize = 11;
     private bool _autoFitColumns = true;
     private bool _hideFeeRows;
     private string _rowHeightOption = "خودکار";
@@ -49,6 +50,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         _fontFamilyName = AvailableFontFamilies.Contains(_settings.FontFamilyName) ? _settings.FontFamilyName : "Tahoma";
         _settings.FontFamilyName = _fontFamilyName;
+        _displayFontSize = Math.Clamp(_settings.DisplayFontSize, 9, 18);
+        _settings.DisplayFontSize = _displayFontSize;
+        _settings.PrintFontFamilyName = AvailableFontFamilies.Contains(_settings.PrintFontFamilyName) ? _settings.PrintFontFamilyName : "Tahoma";
+        _settings.PrintFontSize = Math.Clamp(_settings.PrintFontSize, 7, 14);
         _autoFitColumns = _settings.AutoFitColumns;
         _hideFeeRows = _settings.HideFeeRows;
         _rowHeightOption = AvailableRowHeightOptions.Contains(_settings.RowHeightOption)
@@ -101,6 +106,12 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 SaveSettingsQuietly();
             }
         }
+    }
+
+    public double DisplayFontSize
+    {
+        get => _displayFontSize;
+        private set => SetField(ref _displayFontSize, value);
     }
 
     public bool AutoFitColumns
@@ -158,14 +169,17 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _settings.ShowVerticalGridLines = settings.ShowVerticalGridLines;
         _settings.ShowHorizontalGridLines = settings.ShowHorizontalGridLines;
         _settings.FontFamilyName = AvailableFontFamilies.Contains(settings.FontFamilyName) ? settings.FontFamilyName : "Tahoma";
+        _settings.DisplayFontSize = Math.Clamp(settings.DisplayFontSize, 9, 18);
+        _settings.PrintFontFamilyName = AvailableFontFamilies.Contains(settings.PrintFontFamilyName) ? settings.PrintFontFamilyName : "Tahoma";
+        _settings.PrintFontSize = Math.Clamp(settings.PrintFontSize, 7, 14);
         _settings.AutoFitColumns = settings.AutoFitColumns;
         _settings.HideFeeRows = settings.HideFeeRows;
         _settings.RowHeightOption = AvailableRowHeightOptions.Contains(settings.RowHeightOption) ? settings.RowHeightOption : "خودکار";
         if (settings.DisplayColumns is { Count: > 0 })
             SetDisplayColumns(settings.DisplayColumns);
-        _fontFamilyName = _settings.FontFamilyName; _autoFitColumns = _settings.AutoFitColumns;
+        _fontFamilyName = _settings.FontFamilyName; _displayFontSize = _settings.DisplayFontSize; _autoFitColumns = _settings.AutoFitColumns;
         _hideFeeRows = _settings.HideFeeRows; _rowHeightOption = _settings.RowHeightOption;
-        OnPropertyChanged(nameof(FontFamilyName)); OnPropertyChanged(nameof(AutoFitColumns));
+        OnPropertyChanged(nameof(FontFamilyName)); OnPropertyChanged(nameof(DisplayFontSize)); OnPropertyChanged(nameof(AutoFitColumns));
         OnPropertyChanged(nameof(HideFeeRows)); OnPropertyChanged(nameof(RowHeightOption));
         SaveSettings(); ScheduleApplyFilters();
     }
@@ -270,6 +284,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             _settings.SearchPresets = Presets.ToList();
             _settings.DisplayColumns = _displayColumns.ToList();
             _settings.FontFamilyName = _fontFamilyName;
+            _settings.DisplayFontSize = _displayFontSize;
             _settings.AutoFitColumns = _autoFitColumns;
             _settings.HideFeeRows = _hideFeeRows;
             _settings.RowHeightOption = _rowHeightOption;
