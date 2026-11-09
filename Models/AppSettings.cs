@@ -13,4 +13,9 @@ public sealed class AppSettings
     public bool AutoFitColumns { get; set; } = true;
     public bool HideFeeRows { get; set; }
     public string RowHeightOption { get; set; } = "خودکار";
+    public string ProvinceName { get; set; } = "";
+    public string BranchName { get; set; } = "";
+    public string PrintBranchCode { get; set; } = "";
+    public bool ShowVerticalGridLines { get; set; } = true;
+    public bool ShowHorizontalGridLines { get; set; } = true;
 }
