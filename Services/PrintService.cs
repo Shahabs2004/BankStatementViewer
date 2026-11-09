@@ -38,11 +38,12 @@ public sealed class PrintService
         StatementHeader header,
         IReadOnlyCollection<StatementTransaction> transactions,
         bool landscape,
-        IReadOnlyCollection<string> selectedColumnKeys)
+        IReadOnlyCollection<string> selectedColumnKeys,
+        AppSettings settings)
     {
         // Keep all WPF PrintDialog, FixedDocument, FixedPage, Grid and TextBlock
         // creation/use on the same dispatcher thread to avoid cross-thread access.
-        var result = PrintCore(header, transactions.ToList(), landscape, selectedColumnKeys.ToList());
+        var result = PrintCore(header, transactions.ToList(), landscape, selectedColumnKeys.ToList(), settings);
         return Task.FromResult(result);
     }
 
@@ -50,7 +51,8 @@ public sealed class PrintService
         StatementHeader header,
         IReadOnlyCollection<StatementTransaction> transactions,
         bool landscape,
-        IReadOnlyCollection<string> selectedColumnKeys)
+        IReadOnlyCollection<string> selectedColumnKeys,
+        AppSettings settings)
     {
         var printOrder = new[]
         {
@@ -82,7 +84,7 @@ public sealed class PrintService
         if (pageWidth <= 0 || pageHeight <= 0)
             throw new InvalidOperationException("ابعاد قابل چاپ از درایور چاپگر دریافت نشد.");
 
-        var document = CreateDocument(header, transactions.ToList(), columns, pageWidth, pageHeight, landscape);
+        var document = CreateDocument(header, transactions.ToList(), columns, pageWidth, pageHeight, landscape, settings);
         dialog.PrintDocument(document.DocumentPaginator, "گزارش گردش حساب بانکی");
         return true;
     }
@@ -93,10 +95,11 @@ public sealed class PrintService
         IReadOnlyList<TransactionColumnDefinition> columns,
         double pageWidth,
         double pageHeight,
-        bool landscape)
+        bool landscape,
+        AppSettings settings)
     {
         const double margin = 16;
-        const double headerY = 101;
+        const double headerY = 132;
         const double tableHeaderHeight = 27;
         const double footerReserve = 28;
         var innerWidth = Math.Max(100, pageWidth - 2 * margin);
@@ -122,14 +125,34 @@ public sealed class PrintService
             };
 
             AddAt(page, CreateTextBlock("گزارش گردش حساب بانکی", innerWidth, 23, 14, FontWeights.Bold,
-                TextAlignment.Center, FlowDirection.RightToLeft), margin, 12);
+                TextAlignment.Center, FlowDirection.RightToLeft), margin, 8);
+
+            var logoStream = Application.GetResourceStream(new Uri("pack://application:,,,/Agri-bank_logo.png"));
+            if (logoStream is not null)
+            {
+                using (logoStream.Stream)
+                {
+                    var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                    bitmap.BeginInit(); bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = logoStream.Stream; bitmap.DecodePixelHeight = 72; bitmap.EndInit(); bitmap.Freeze();
+                    var logo = new Image { Source = bitmap, Width = 54, Height = 62, Stretch = Stretch.Uniform };
+                    AddAt(page, logo, margin + innerWidth - 58, 5);
+                }
+            }
+
+            var provinceLine = $"مدیریت بانک کشاورزی استان {Dash(settings.ProvinceName)}";
+            var branchLine = $"شعبه {Dash(settings.BranchName)}  کد {Dash(settings.PrintBranchCode)}";
+            var printDate = DateTime.Now.ToString("yyyy/MM/dd HH:mm", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+            AddAt(page, CreateTextBlock(provinceLine, innerWidth - 70, 17, 9.2, FontWeights.Bold, TextAlignment.Right, FlowDirection.RightToLeft), margin, 34);
+            AddAt(page, CreateTextBlock(branchLine, innerWidth - 70, 17, 9.0, FontWeights.Bold, TextAlignment.Right, FlowDirection.RightToLeft), margin, 51);
+            AddAt(page, CreateTextBlock($"تاریخ چاپ: {printDate}", innerWidth, 15, 7.8, FontWeights.Normal, TextAlignment.Left, FlowDirection.RightToLeft), margin, 70);
 
             var line1 = $"صاحب حساب: {Dash(header.CustomerName)}     شبا: {Dash(header.Iban)}";
-            var line2 = $"بازه گزارش: {Dash(header.ReportPeriod)}     کد شعبه: {Dash(header.BranchCode)}     تاریخ دریافت: {Dash(header.ReceivedDate)}";
+            var line2 = $"بازه گزارش: {Dash(header.ReportPeriod)}     کد شعبه صورت‌حساب: {Dash(header.BranchCode)}     تاریخ دریافت: {Dash(header.ReceivedDate)}";
             var line3 = $"مانده آغازین: {header.OpeningBalance.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}     مانده پایانی: {header.ClosingBalance.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)}     تعداد رکوردها: {transactions.Count:N0}";
-            AddAt(page, CreateTextBlock(line1, innerWidth, 18, 8.1, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 42);
-            AddAt(page, CreateTextBlock(line2, innerWidth, 18, 8.1, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 61);
-            AddAt(page, CreateTextBlock(line3, innerWidth, 18, 8.1, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 80);
+            AddAt(page, CreateTextBlock(line1, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 86);
+            AddAt(page, CreateTextBlock(line2, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 102);
+            AddAt(page, CreateTextBlock(line3, innerWidth, 16, 7.8, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft), margin, 118);
 
             var tableHeader = CreateGridRow(columns.Select(c => c.Header).ToList(), columns, columnWidths,
                 tableHeaderHeight, 8.5, true, false);
