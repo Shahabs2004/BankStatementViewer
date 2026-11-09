@@ -126,7 +126,7 @@ public sealed class PrintService
                 ClipToBounds = true
             };
 
-            AddAt(page, CreateTextBlock("گزارش گردش حساب بانکی", innerWidth, 23, fontSize * 1.7, FontWeights.Bold,
+            AddAt(page, CreateTextBlock("گزارش گردش حساب بانکی", innerWidth, 30, fontSize * 1.7, FontWeights.Bold,
                 TextAlignment.Center, FlowDirection.RightToLeft, printFont), margin, 8);
 
             var logoStream = Application.GetResourceStream(new Uri("pack://application:,,,/Agri-bank_logo.png"));
@@ -152,7 +152,7 @@ public sealed class PrintService
             AddAt(page, CreateTextBlock(provinceLine, branchInfoWidth, 17, fontSize * 1.1, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft, printFont), branchInfoX, 99);
             AddAt(page, CreateTextBlock(branchLine, branchInfoWidth, 17, fontSize * 1.08, FontWeights.Bold, TextAlignment.Center, FlowDirection.RightToLeft, printFont), branchInfoX, 116);
             // Keep the print timestamp directly below the report title, on the left side.
-            AddAt(page, CreateTextBlock($"تاریخ چاپ: {printDate}", innerWidth - branchInfoWidth - 16, 15, 7.8,
+            AddAt(page, CreateTextBlock($"تاریخ چاپ: {printDate}", innerWidth - branchInfoWidth - 16, 18, fontSize * 0.94,
                 FontWeights.Normal, TextAlignment.Left, FlowDirection.LeftToRight, printFont), margin, 42);
 
             var line1 = $"صاحب حساب: {Dash(header.CustomerName)}     شبا: {Dash(header.Iban)}";
