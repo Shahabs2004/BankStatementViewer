@@ -18,7 +18,13 @@ public partial class MainWindow : Window
 
     private MainViewModel ViewModel => (MainViewModel)DataContext;
 
-    public MainWindow() => InitializeComponent();
+    public MainWindow()
+    {
+        InitializeComponent();
+        // The main window must own its ViewModel; without this, font and all other
+        // ViewModel bindings have no source and display preferences cannot be applied.
+        DataContext = new MainViewModel();
+    }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
