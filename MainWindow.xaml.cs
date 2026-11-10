@@ -70,6 +70,25 @@ public partial class MainWindow : Window
         FontSize = vm.DisplayFontSize;
         TransactionsGrid.FontFamily = family;
         TransactionsGrid.FontSize = vm.DisplayFontSize;
+
+        // DataGridTextColumn creates its own TextBlock elements. Set ElementStyle
+        // explicitly so the selected font is not lost to the column's default style.
+        var textStyle = new System.Windows.Style(typeof(System.Windows.Controls.TextBlock));
+        textStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.TextBlock.FontFamilyProperty, family));
+        textStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.TextBlock.FontSizeProperty, vm.DisplayFontSize));
+        var headerStyle = new System.Windows.Style(typeof(System.Windows.Controls.DataGridColumnHeader));
+        headerStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.Control.FontFamilyProperty, family));
+        headerStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.Control.FontSizeProperty, vm.DisplayFontSize));
+        foreach (var column in TransactionsGrid.Columns)
+        {
+            column.HeaderStyle = headerStyle;
+            if (column is System.Windows.Controls.DataGridTextColumn textColumn)
+            {
+                textColumn.ElementStyle = textStyle;
+                textColumn.EditingElementStyle = textStyle;
+            }
+        }
+
         TransactionsGrid.InvalidateVisual();
         TransactionsGrid.UpdateLayout();
     }
