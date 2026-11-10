@@ -76,7 +76,7 @@ public partial class MainWindow : Window
         var textStyle = new System.Windows.Style(typeof(System.Windows.Controls.TextBlock));
         textStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.TextBlock.FontFamilyProperty, family));
         textStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.TextBlock.FontSizeProperty, vm.DisplayFontSize));
-        var headerStyle = new System.Windows.Style(typeof(System.Windows.Controls.DataGridColumnHeader));
+        var headerStyle = new System.Windows.Style(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader));
         headerStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.Control.FontFamilyProperty, family));
         headerStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.Control.FontSizeProperty, vm.DisplayFontSize));
         foreach (var column in TransactionsGrid.Columns)
