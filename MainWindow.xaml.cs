@@ -70,6 +70,8 @@ public partial class MainWindow : Window
         FontSize = vm.DisplayFontSize;
         TransactionsGrid.FontFamily = family;
         TransactionsGrid.FontSize = vm.DisplayFontSize;
+        TransactionsGrid.InvalidateVisual();
+        TransactionsGrid.UpdateLayout();
     }
 
     private void ApplyGridLineSettings()
