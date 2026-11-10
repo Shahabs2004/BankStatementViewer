@@ -191,6 +191,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _displayFontSize = _settings.DisplayFontSize;
         _autoFitColumns = _settings.AutoFitColumns;
         _hideFeeRows = _settings.HideFeeRows; _rowHeightOption = _settings.RowHeightOption;
+        OnPropertyChanged(nameof(FontFamilyName));
+        OnPropertyChanged(nameof(DisplayFontSize));
         OnPropertyChanged(nameof(AutoFitColumns));
         OnPropertyChanged(nameof(HideFeeRows)); OnPropertyChanged(nameof(RowHeightOption));
         SaveSettings(); ScheduleApplyFilters();
