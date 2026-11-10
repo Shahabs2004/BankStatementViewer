@@ -305,7 +305,16 @@ public sealed class MainViewModel : INotifyPropertyChanged
             _settings.HideFeeRows = _hideFeeRows;
             _settings.RowHeightOption = _rowHeightOption;
             _settingsService.Save(_settings);
-            SettingsStatus = $"تنظیمات ذخیره شد: {_settingsService.SettingsPath}";
+
+            // Read the saved JSON back and verify the two display-font preferences.
+            var persisted = _settingsService.Load(out var loadWarning);
+            if (!string.Equals(persisted.FontFamilyName, _settings.FontFamilyName, StringComparison.Ordinal)
+                || Math.Abs(persisted.DisplayFontSize - _settings.DisplayFontSize) > 0.001)
+                throw new InvalidDataException("مقادیر فونت نمایش پس از ذخیره‌سازی با مقادیر انتخاب‌شده مطابقت ندارند.");
+            if (!string.IsNullOrWhiteSpace(loadWarning))
+                throw new InvalidDataException(loadWarning);
+
+            SettingsStatus = $"فونت نمایش: {_settings.FontFamilyName}، اندازه: {_settings.DisplayFontSize} | ذخیره و بازخوانی شد: {_settingsService.SettingsPath}";
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or ArgumentException)
         {
