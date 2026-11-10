@@ -85,7 +85,6 @@ public partial class MainWindow : Window
             if (column is System.Windows.Controls.DataGridTextColumn textColumn)
             {
                 textColumn.ElementStyle = textStyle;
-                textColumn.EditingElementStyle = textStyle;
             }
         }
 
