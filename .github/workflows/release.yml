@@ -63,6 +63,9 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore BankStatementViewer.csproj --verbosity minimal -p:InvariantGlobalization=false
 
+      - name: Run display font settings regression test
+        run: dotnet test tests/BankStatementViewer.Tests/BankStatementViewer.Tests.csproj --configuration Release --filter FullyQualifiedName~SettingsServiceTests --verbosity minimal -p:InvariantGlobalization=false
+
       - name: Build Release
         run: dotnet build BankStatementViewer.csproj --configuration Release --no-restore --verbosity minimal -p:InvariantGlobalization=false
 
