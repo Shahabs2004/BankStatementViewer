@@ -104,15 +104,27 @@ public sealed class StatementParser
 
     private static StatementData ParseSheets(string filePath, IEnumerable<SheetRows> sheets)
     {
-        var candidates = sheets
-            .Select(sheet => new { Sheet = sheet, Match = FindHeader(sheet.Rows) })
-            .Where(x => x.Match is not null)
-            .OrderByDescending(x => x.Match!.Score)
-            .ToList();
+        var sheetList = sheets.ToList();
+        var candidates = new List<(SheetRows Sheet, HeaderMatch Match)>();
+        InvalidDataException? lastHeaderError = null;
+        foreach (var sheet in sheetList)
+        {
+            try
+            {
+                var match = FindHeader(sheet.Rows);
+                if (match is not null) candidates.Add((sheet, match));
+            }
+            catch (InvalidDataException ex)
+            {
+                lastHeaderError = ex;
+            }
+        }
+        candidates = candidates.OrderByDescending(x => x.Match.Score).ToList();
 
         if (candidates.Count == 0)
         {
-            var first = sheets.FirstOrDefault();
+            if (lastHeaderError is not null) throw lastHeaderError;
+            var first = sheetList.FirstOrDefault();
             var sample = BuildSample(first?.Rows ?? new List<List<string>>());
             throw new InvalidDataException(
                 "ردیف سرستون‌های گردش حساب پیدا نشد. برای تشخیص جدول، حداقل ستون‌های توضیحات، مانده و واریز/برداشت لازم است.\n" +
@@ -122,7 +134,7 @@ public sealed class StatementParser
 
         var selected = candidates[0];
         var rows = selected.Sheet.Rows;
-        var headerIndex = selected.Match!.RowIndex;
+        var headerIndex = selected.Match.RowIndex;
         var map = selected.Match.Columns;
         var header = ExtractStatementHeader(rows, headerIndex, filePath);
         var transactions = new List<StatementTransaction>();
