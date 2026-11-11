@@ -257,6 +257,7 @@ public sealed class StatementParser
     private static HeaderMatch? FindHeader(List<List<string>> rows)
     {
         HeaderMatch? best = null;
+        InvalidDataException? lastHeaderError = null;
         for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
         {
             var cells = rows[rowIndex].Select(CleanCell).ToList();
@@ -278,9 +279,19 @@ public sealed class StatementParser
             if (!isTableHeader) continue;
 
             var score = 5 + (hasIban ? 2 : 0) + (hasDeposit && hasWithdrawal ? 2 : 0) + (normalized.Any(s => s.Contains("تاریخ") || s.Equals("date", StringComparison.OrdinalIgnoreCase)) ? 1 : 0);
-            var map = BuildColumnMap(cells);
+            ColumnMap map;
+            try
+            {
+                map = BuildColumnMap(cells);
+            }
+            catch (InvalidDataException ex)
+            {
+                lastHeaderError = ex;
+                continue;
+            }
             if (best is null || score > best.Score) best = new HeaderMatch(rowIndex, map, score);
         }
+        if (best is null && lastHeaderError is not null) throw lastHeaderError;
         return best;
     }
 
