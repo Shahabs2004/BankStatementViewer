@@ -58,38 +58,14 @@ public partial class MainWindow : Window
         if (dialog.ShowDialog() == true)
         {
             try { ViewModel.ApplyFullSettings(dialog.Settings); ApplyDisplayFontSettings(); ApplyGridColumnSettings(); ApplyGridLineSettings(); }
-            catch (Exception ex) { MessageBox.Show(this, $"ذخیره تنظیمات ناموفق بود:\\n{ex.Message}", "تنظیمات کامل", MessageBoxButton.OK, MessageBoxImage.Error); }
+            catch (Exception ex) { MessageBox.Show(this, $"ذخیره تنظیمات ناموفق بود:\n{ex.Message}", "تنظیمات کامل", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
     }
 
     private void ApplyDisplayFontSettings()
     {
-        if (DataContext is not MainViewModel vm) return;
-        var family = new System.Windows.Media.FontFamily(vm.FontFamilyName);
-        FontFamily = family;
-        FontSize = vm.DisplayFontSize;
-        TransactionsGrid.FontFamily = family;
-        TransactionsGrid.FontSize = vm.DisplayFontSize;
-
-        // DataGridTextColumn creates its own TextBlock elements. Set ElementStyle
-        // explicitly so the selected font is not lost to the column's default style.
-        var textStyle = new System.Windows.Style(typeof(System.Windows.Controls.TextBlock));
-        textStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.TextBlock.FontFamilyProperty, family));
-        textStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.TextBlock.FontSizeProperty, vm.DisplayFontSize));
-        var headerStyle = new System.Windows.Style(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader));
-        headerStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.Control.FontFamilyProperty, family));
-        headerStyle.Setters.Add(new System.Windows.Setter(System.Windows.Controls.Control.FontSizeProperty, vm.DisplayFontSize));
-        foreach (var column in TransactionsGrid.Columns)
-        {
-            column.HeaderStyle = headerStyle;
-            if (column is System.Windows.Controls.DataGridTextColumn textColumn)
-            {
-                textColumn.ElementStyle = textStyle;
-            }
-        }
-
-        TransactionsGrid.InvalidateVisual();
-        TransactionsGrid.UpdateLayout();
+        // FontFamily and FontSize are bound in XAML; refresh generated cell visuals only.
+        TransactionsGrid?.Items.Refresh();
     }
 
     private void ApplyGridLineSettings()
@@ -125,7 +101,7 @@ public partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, $"ذخیره تنظیمات FTP ناموفق بود:\\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, $"ذخیره تنظیمات FTP ناموفق بود:\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
@@ -172,7 +148,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, $"خواندن فایل از FTP ناموفق بود:\\n{ex.Message}", "خطای FTP", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, $"خواندن فایل از FTP ناموفق بود:\n{ex.Message}", "خطای FTP", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally { SetBusy(false); }
     }
@@ -386,7 +362,7 @@ public partial class MainWindow : Window
             MessageBox.Show(this, "ابتدا یک صورت‌حساب باز کنید.", "خلاصه سریع", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
-        var dialog = new QuickSummaryWindow(ViewModel.MatchedTransactions, ViewModel.FontFamilyName) { Owner = this };
+        var dialog = new QuickSummaryWindow(ViewModel.MatchedTransactions, ViewModel.FontFamilyName, ViewModel.DisplayFontSize) { Owner = this };
         dialog.ShowDialog();
     }
 
