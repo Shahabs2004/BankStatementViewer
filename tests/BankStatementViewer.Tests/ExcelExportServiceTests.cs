@@ -3,11 +3,15 @@ using BankStatementViewer.Models;
 using BankStatementViewer.Services;
 using ClosedXML.Excel;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace BankStatementViewer.Tests;
 
 public sealed class ExcelExportServiceTests
 {
+    private readonly ITestOutputHelper _output;
+
+    public ExcelExportServiceTests(ITestOutputHelper output) => _output = output;
     [Fact]
     public void Export_PreservesTrackingAndIdentifierAsText()
     {
@@ -35,6 +39,8 @@ public sealed class ExcelExportServiceTests
     public void FaIrCulture_ExposesCalendarAndNumberGroupSeparator()
     {
         var culture = CultureInfo.GetCultureInfo("fa-IR");
+        _output.WriteLine($"Calendar: {culture.DateTimeFormat.Calendar.GetType().FullName}");
+        _output.WriteLine($"NumberGroupSeparator: '{culture.NumberFormat.NumberGroupSeparator}'");
         Assert.NotNull(culture.DateTimeFormat.Calendar);
         Assert.False(string.IsNullOrEmpty(culture.NumberFormat.NumberGroupSeparator));
     }
