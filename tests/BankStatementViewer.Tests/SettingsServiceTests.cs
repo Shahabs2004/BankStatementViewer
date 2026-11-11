@@ -96,4 +96,25 @@ public sealed class SettingsServiceTests
         }
     }
 
+    [Fact]
+    public void Load_BackupsCorruptSettingsAndReturnsWarning()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"BankStatementViewer-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        var path = Path.Combine(directory, "appsettings.json");
+        try
+        {
+            File.WriteAllText(path, "{ invalid json");
+            var service = new SettingsService(directory);
+            var loaded = service.Load(out var warning);
+            Assert.NotNull(loaded);
+            Assert.False(string.IsNullOrWhiteSpace(warning));
+            Assert.Single(Directory.GetFiles(directory, "appsettings.json.corrupt-*"));
+        }
+        finally
+        {
+            if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
+        }
+    }
+
 }
