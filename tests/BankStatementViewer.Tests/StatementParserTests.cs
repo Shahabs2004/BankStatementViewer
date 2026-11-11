@@ -159,4 +159,42 @@ public sealed class StatementParserTests
         finally { if (File.Exists(path)) File.Delete(path); }
     }
 
+    [Fact]
+    public void Parse_SkipsSheetWithIncompleteHeaderAndUsesNextValidSheet()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.xlsx");
+        try
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var incomplete = workbook.Worksheets.Add("Incomplete");
+                incomplete.Cell(1, 1).Value = "توضیحات";
+                incomplete.Cell(1, 2).Value = "مانده";
+                incomplete.Cell(1, 3).Value = "برداشت";
+                incomplete.Cell(2, 1).Value = "ردیف خلاصه";
+                incomplete.Cell(2, 2).Value = 500;
+
+                var valid = workbook.Worksheets.Add("Valid");
+                var headers = new[] { "توضیحات", "مانده", "واریز", "برداشت", "تاریخ" };
+                for (var i = 0; i < headers.Length; i++) valid.Cell(1, i + 1).Value = headers[i];
+                valid.Cell(2, 1).Value = "واریز آزمایشی";
+                valid.Cell(2, 2).Value = 1500;
+                valid.Cell(2, 3).Value = 1500;
+                valid.Cell(2, 4).Value = 0;
+                valid.Cell(2, 5).Value = "1403/01/02";
+                workbook.SaveAs(path);
+            }
+
+            var result = Parser.Parse(path);
+
+            Assert.Single(result.Transactions);
+            Assert.Equal("1403/01/02", result.Transactions[0].Date);
+            Assert.Equal(1500m, result.Transactions[0].Deposit);
+        }
+        finally
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+    }
+
 }
