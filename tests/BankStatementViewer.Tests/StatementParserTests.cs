@@ -130,7 +130,7 @@ public sealed class StatementParserTests
     [Fact]
     public void Parse_SkipsIncompleteHeaderAndUsesLaterCompleteHeader()
     {
-        var path = Path.Combine(Path.GetTempPath(), $"\u007bGuid.NewGuid():N\u007d.xlsx");
+        var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.xlsx");
         try
         {
             using (var workbook = new XLWorkbook())
