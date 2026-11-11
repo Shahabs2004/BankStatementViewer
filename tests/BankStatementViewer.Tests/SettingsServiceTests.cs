@@ -59,10 +59,10 @@ public sealed class SettingsServiceTests
                         RowHeightOption = "زیاد"
                     };
 
-                    vm.ApplyFullSettings(settings);
-
                     Assert.Contains("Verdana", BankStatementViewer.ViewModels.MainViewModel.AvailableFontFamilies);
                     Assert.Equal("Tahoma", settings.FontFamilyName);
+
+                    vm.ApplyFullSettings(settings);
                     Assert.Equal("Verdana", vm.FontFamilyName);
                     Assert.Equal(16, vm.DisplayFontSize);
                     Assert.False(vm.AutoFitColumns);
