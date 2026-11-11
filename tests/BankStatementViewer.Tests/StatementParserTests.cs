@@ -10,8 +10,15 @@ public sealed class StatementParserTests
     private const int ExpectedTransactionCount = 128;
     private static readonly StatementParser Parser = new();
 
-    private static string FixturePath => Path.Combine(
-        AppContext.BaseDirectory, "Fixtures", "sample-statement.xls");
+    private static string FixturePath
+    {
+        get
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "Fixtures", "sample-statement.xls");
+            Assert.True(File.Exists(path), "فیکسچر موجود نیست: tests/BankStatementViewer.Tests/Fixtures/sample-statement.xls؛ لطفاً فایل نمونه بی‌نام‌شده را به مخزن اضافه کنید.");
+            return path;
+        }
+    }
 
     [Fact]
     public void Parse_ReadsHeaderFieldsByLabels()
@@ -120,4 +127,32 @@ public sealed class StatementParserTests
             if (File.Exists(path)) File.Delete(path);
         }
     }
+    [Fact]
+    public void Parse_SkipsIncompleteHeaderAndUsesLaterCompleteHeader()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"\u007bGuid.NewGuid():N\u007d.xlsx");
+        try
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var sheet = workbook.Worksheets.Add("Statement");
+                sheet.Cell(1, 1).Value = "توضیحات";
+                sheet.Cell(1, 2).Value = "مانده";
+                sheet.Cell(1, 3).Value = "واریز";
+                var headers = new[] { "توضیحات", "مانده", "واریز", "برداشت", "تاریخ" };
+                for (var i = 0; i < headers.Length; i++) sheet.Cell(7, i + 1).Value = headers[i];
+                sheet.Cell(8, 1).Value = "انتقالMOB";
+                sheet.Cell(8, 2).Value = 1000;
+                sheet.Cell(8, 3).Value = 1000;
+                sheet.Cell(8, 4).Value = 0;
+                sheet.Cell(8, 5).Value = "1403/01/01";
+                workbook.SaveAs(path);
+            }
+            var result = Parser.Parse(path);
+            Assert.Single(result.Transactions);
+            Assert.Equal("1403/01/01", result.Transactions[0].Date);
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
 }
