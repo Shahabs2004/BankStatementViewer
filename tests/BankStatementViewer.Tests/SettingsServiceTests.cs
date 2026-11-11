@@ -60,7 +60,7 @@ public sealed class SettingsServiceTests
                     };
 
                     Assert.Contains("Verdana", BankStatementViewer.ViewModels.MainViewModel.AvailableFontFamilies);
-                    Assert.Equal("Tahoma", settings.FontFamilyName);
+                    Assert.Equal("Tahoma", vm.FontFamilyName);
 
                     vm.ApplyFullSettings(settings);
                     Assert.Equal("Verdana", vm.FontFamilyName);
