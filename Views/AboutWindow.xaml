@@ -39,6 +39,48 @@
 
                 <Border Background="White" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
                     <StackPanel>
+                        <TextBlock Text="تاریخچه تغییرات نسخه‌ها" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                        <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl x:Name="ChangelogList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,0,0,12">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Version}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentGreenBrush}" />
+                                                <TextBlock Text="{Binding Date}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="8,2,0,0" />
+                                                <Border x:Name="CurrentBadge" Background="{DynamicResource PrimaryBrush}" CornerRadius="3" Padding="5,1" Margin="8,0,0,0" Visibility="Collapsed">
+                                                    <TextBlock Text="نسخه فعلی" FontSize="10" Foreground="White" />
+                                                </Border>
+                                            </StackPanel>
+                                            <ItemsControl ItemsSource="{Binding Items}" Margin="2,4,0,0">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,1">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Grid.Column="0" Text="•" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,6,0" />
+                                                            <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                <Setter TargetName="CurrentBadge" Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
                         <TextBlock Text="پیوندهای رسمی" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
                         <Button Content="مخزن پروژه در GitHub" Click="Repository_Click" HorizontalContentAlignment="Right" Padding="10,8" Margin="0,0,0,6" />
                         <Button Content="دانلود نسخه‌ها و به‌روزرسانی‌ها (Releases)" Click="Releases_Click" HorizontalContentAlignment="Right" Padding="10,8" />

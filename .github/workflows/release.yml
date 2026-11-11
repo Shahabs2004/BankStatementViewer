@@ -67,13 +67,19 @@ jobs:
         run: dotnet test tests/BankStatementViewer.Tests/BankStatementViewer.Tests.csproj --configuration Release --filter FullyQualifiedName~SettingsServiceTests --verbosity minimal -p:InvariantGlobalization=false
 
       - name: Build Release
-        run: dotnet build BankStatementViewer.csproj --configuration Release --no-restore --verbosity minimal -p:InvariantGlobalization=false
+        run: |
+          $buildVersion = "${{ steps.version.outputs.TAG }}".TrimStart('v')
+          dotnet build BankStatementViewer.csproj --configuration Release --no-restore --verbosity minimal -p:InvariantGlobalization=false -p:Version=$buildVersion
 
       - name: Publish Light Version (Framework-Dependent)
-        run: dotnet publish BankStatementViewer.csproj -c Release -o publish-light -f net8.0-windows --no-self-contained -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal
+        run: |
+          $buildVersion = "${{ steps.version.outputs.TAG }}".TrimStart('v')
+          dotnet publish BankStatementViewer.csproj -c Release -o publish-light -f net8.0-windows --no-self-contained -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal -p:Version=$buildVersion
 
       - name: Publish Full Version (Self-Contained)
-        run: dotnet publish BankStatementViewer.csproj -c Release -o publish-full -f net8.0-windows -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal
+        run: |
+          $buildVersion = "${{ steps.version.outputs.TAG }}".TrimStart('v')
+          dotnet publish BankStatementViewer.csproj -c Release -o publish-full -f net8.0-windows -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:InvariantGlobalization=false -p:DebugType=none -p:DebugSymbols=false -v minimal -p:Version=$buildVersion
 
       - name: Keep only English and Persian culture folders and verify runtime
         shell: pwsh

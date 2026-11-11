@@ -16,8 +16,7 @@
     <AssemblyName>BankStatementViewer</AssemblyName>
     <StartupObject>BankStatementViewer.App</StartupObject>
     <ApplicationIcon>005-money.ico</ApplicationIcon>
-    <FileVersion>1.1.0.0</FileVersion>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <Version>1.1.19</Version>
   </PropertyGroup>
 
   <!-- Test sources live under the repository root but must only compile in the test project. -->
@@ -28,6 +27,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="005-money.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Shown in the About window; the exact logical name keeps the lookup stable. -->
+    <EmbeddedResource Include="CHANGELOG.md" LogicalName="BankStatementViewer.CHANGELOG.md" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.102.3" />
