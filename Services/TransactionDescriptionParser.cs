@@ -27,9 +27,10 @@ public static class TransactionDescriptionParser
             .Where(s => s.Length > 0)
             .ToList();
         var firstLine = lines.FirstOrDefault() ?? string.Empty;
+        var spacedAll = TextNormalizer.Normalize(raw);
         var compactAll = TextNormalizer.Normalize(raw, removeWhitespace: true);
 
-        transaction.Channel = DetectChannel(compactAll);
+        transaction.Channel = DetectChannel(spacedAll, compactAll);
         transaction.OtherAccount = ExtractOtherAccounts(lines);
         transaction.Purpose = ExtractPurpose(lines) ?? string.Empty;
 
@@ -43,17 +44,17 @@ public static class TransactionDescriptionParser
         if (firstNonEmptyIndex >= 0)
             displayLines[firstNonEmptyIndex] = CleanOperation(displayLines[firstNonEmptyIndex]);
         transaction.Description = string.Join(Environment.NewLine, displayLines);
-        if (compactAll.Contains("کارمزد", StringComparison.Ordinal) || HasLatinToken(compactAll, "fee"))
+        if (compactAll.Contains("کارمزد", StringComparison.Ordinal) || HasLatinToken(spacedAll, "fee"))
             transaction.IsFee = true;
     }
 
-    private static string DetectChannel(string compactText)
+    private static string DetectChannel(string spacedText, string compactText)
     {
-        if (HasLatinToken(compactText, "kyos")) return "KYOS";
-        if (HasLatinToken(compactText, "mob")) return "MOB";
-        if (HasLatinToken(compactText, "paya") || HasLatinToken(compactText, "payment") ||
+        if (HasLatinToken(spacedText, "kyos")) return "KYOS";
+        if (HasLatinToken(spacedText, "mob")) return "MOB";
+        if (HasLatinToken(spacedText, "paya") || HasLatinToken(spacedText, "payment") ||
             compactText.Contains("پایا", StringComparison.Ordinal)) return "PAYA";
-        if (HasLatinToken(compactText, "pos") || compactText.Contains("خریدباpos", StringComparison.Ordinal) ||
+        if (HasLatinToken(spacedText, "pos") || compactText.Contains("خریدباpos", StringComparison.Ordinal) ||
             compactText.Contains("خریداینترنتی", StringComparison.Ordinal) || compactText.Contains("شتاب", StringComparison.Ordinal)) return "POS";
         return "سایر";
     }
