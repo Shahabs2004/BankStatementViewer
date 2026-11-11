@@ -47,4 +47,36 @@ public sealed class TransactionDescriptionParserTests
         TransactionDescriptionParser.Populate(transaction, "fee");
         Assert.True(transaction.IsFee);
     }
+    [Fact]
+    public void Populate_DetectsFeeWithSpace()
+    {
+        var transaction = new StatementTransaction();
+        TransactionDescriptionParser.Populate(transaction, "service fee");
+        Assert.True(transaction.IsFee);
+    }
+
+    [Fact]
+    public void Populate_DetectsMobWithSpaceAfterPersianText()
+    {
+        var transaction = new StatementTransaction();
+        TransactionDescriptionParser.Populate(transaction, "انتقال MOB");
+        Assert.Equal("MOB", transaction.Channel);
+    }
+
+    [Fact]
+    public void Populate_DetectsPosAtStartOfDescription()
+    {
+        var transaction = new StatementTransaction();
+        TransactionDescriptionParser.Populate(transaction, "POS purchase");
+        Assert.Equal("POS", transaction.Channel);
+    }
+
+    [Fact]
+    public void Populate_DoesNotDetectFeeInsideCoffeeWithPrefix()
+    {
+        var transaction = new StatementTransaction();
+        TransactionDescriptionParser.Populate(transaction, "bill coffee");
+        Assert.False(transaction.IsFee);
+    }
+
 }
