@@ -7,10 +7,11 @@ namespace BankStatementViewer.Views;
 
 public partial class QuickSummaryWindow : Window
 {
-    public QuickSummaryWindow(IReadOnlyCollection<StatementTransaction> transactions, string fontFamily)
+    public QuickSummaryWindow(IReadOnlyCollection<StatementTransaction> transactions, string fontFamily, double fontSize = 0)
     {
         InitializeComponent();
         if (!string.IsNullOrWhiteSpace(fontFamily)) FontFamily = new FontFamily(fontFamily);
+        if (fontSize > 0) FontSize = fontSize;
         var rows = transactions.ToList();
         ChannelSummaries = new ObservableCollection<SummaryGroupRow>(rows
             .GroupBy(t => string.IsNullOrWhiteSpace(t.Channel) ? "سایر" : t.Channel)
