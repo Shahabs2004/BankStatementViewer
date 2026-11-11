@@ -54,6 +54,14 @@ public sealed class SettingsService
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or InvalidDataException or ArgumentException)
         {
             warning = $"تنظیمات قبلی بارگذاری نشد و مقادیر پیش‌فرض استفاده می‌شود.\n{ex.Message}";
+            var backupName = string.Empty;
+            if (File.Exists(_settingsPath))
+            {
+                backupName = Path.GetFileName(_settingsPath) + ".corrupt-" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                try { File.Move(_settingsPath, Path.Combine(Path.GetDirectoryName(_settingsPath)!, backupName)); }
+                catch { backupName = string.Empty; }
+            }
+            if (!string.IsNullOrEmpty(backupName)) warning += $"\nفایل خراب به نام {backupName} پشتیبان‌گیری شد.";
             var defaults = CreateDefaults();
             try
             {
