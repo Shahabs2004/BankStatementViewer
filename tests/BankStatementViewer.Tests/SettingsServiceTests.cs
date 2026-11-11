@@ -36,4 +36,66 @@ public sealed class SettingsServiceTests
                 Directory.Delete(directory, recursive: true);
         }
     }
+    [Fact]
+    public void ApplyFullSettings_UpdatesDisplayFontAndPersistsAllDisplayPreferences()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"BankStatementViewer-{Guid.NewGuid():N}");
+        var previousAppData = Environment.GetEnvironmentVariable("APPDATA");
+        Exception? testException = null;
+
+        try
+        {
+            Environment.SetEnvironmentVariable("APPDATA", directory);
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    var vm = new BankStatementViewer.ViewModels.MainViewModel();
+                    var settings = new AppSettings
+                    {
+                        FontFamilyName = "B Nazanin",
+                        DisplayFontSize = 16,
+                        AutoFitColumns = false,
+                        HideFeeRows = true,
+                        RowHeightOption = "زیاد"
+                    };
+
+                    vm.ApplyFullSettings(settings);
+
+                    Assert.Equal("B Nazanin", vm.FontFamilyName);
+                    Assert.Equal(16, vm.DisplayFontSize);
+                    Assert.False(vm.AutoFitColumns);
+                    Assert.True(vm.HideFeeRows);
+                    Assert.Equal("زیاد", vm.RowHeightOption);
+
+                    var saved = System.Text.Json.JsonSerializer.Deserialize<AppSettings>(
+                        File.ReadAllText(vm.SettingsPath));
+                    Assert.NotNull(saved);
+                    Assert.Equal("B Nazanin", saved.FontFamilyName);
+                    Assert.Equal(16, saved.DisplayFontSize);
+                    Assert.False(saved.AutoFitColumns);
+                    Assert.True(saved.HideFeeRows);
+                    Assert.Equal("زیاد", saved.RowHeightOption);
+                }
+                catch (Exception ex)
+                {
+                    testException = ex;
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+
+            if (testException is not null)
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(testException).Throw();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("APPDATA", previousAppData);
+            if (Directory.Exists(directory))
+                Directory.Delete(directory, recursive: true);
+        }
+    }
+
 }
