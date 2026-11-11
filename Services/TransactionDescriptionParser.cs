@@ -6,6 +6,7 @@ namespace BankStatementViewer.Services;
 /// <summary>Extracts useful customer-facing details from bank-specific multi-line descriptions.</summary>
 public static class TransactionDescriptionParser
 {
+    private static readonly Regex LatinToken = new(@"(?<![a-z])(?:kyos|mob|paya|payment|pos|fee)(?![a-z])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex BreakTag = new(@"<br\s*/?>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex PurposeLabel = new(
         @"^\s*(?:بابت|موضوع|علت|هدف|کاربرد|شرح(?:\s+تراکنش)?|توضیحات|purpose|reason)\s*[:：-]?\s*(.+?)\s*$",
@@ -42,20 +43,23 @@ public static class TransactionDescriptionParser
         if (firstNonEmptyIndex >= 0)
             displayLines[firstNonEmptyIndex] = CleanOperation(displayLines[firstNonEmptyIndex]);
         transaction.Description = string.Join(Environment.NewLine, displayLines);
-        if (compactAll.Contains("کارمزد", StringComparison.Ordinal) || compactAll.Contains("fee", StringComparison.Ordinal))
+        if (compactAll.Contains("کارمزد", StringComparison.Ordinal) || HasLatinToken(compactAll, "fee"))
             transaction.IsFee = true;
     }
 
     private static string DetectChannel(string compactText)
     {
-        if (compactText.Contains("kyos", StringComparison.Ordinal)) return "KYOS";
-        if (compactText.Contains("mob", StringComparison.Ordinal)) return "MOB";
-        if (compactText.Contains("paya", StringComparison.Ordinal) || compactText.Contains("payment", StringComparison.Ordinal) ||
+        if (HasLatinToken(compactText, "kyos")) return "KYOS";
+        if (HasLatinToken(compactText, "mob")) return "MOB";
+        if (HasLatinToken(compactText, "paya") || HasLatinToken(compactText, "payment") ||
             compactText.Contains("پایا", StringComparison.Ordinal)) return "PAYA";
-        if (compactText.Contains("pos", StringComparison.Ordinal) || compactText.Contains("خریدباpos", StringComparison.Ordinal) ||
+        if (HasLatinToken(compactText, "pos") || compactText.Contains("خریدباpos", StringComparison.Ordinal) ||
             compactText.Contains("خریداینترنتی", StringComparison.Ordinal) || compactText.Contains("شتاب", StringComparison.Ordinal)) return "POS";
         return "سایر";
     }
+
+    private static bool HasLatinToken(string text, string token) =>
+        Regex.IsMatch(text, $@"(?<![a-z]){Regex.Escape(token)}(?![a-z])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     private static string? ExtractPurpose(IReadOnlyList<string> lines)
     {
