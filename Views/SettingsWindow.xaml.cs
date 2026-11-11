@@ -64,10 +64,10 @@ public partial class SettingsWindow : Window
         Settings.ShowHorizontalGridLines = HorizontalLinesCheck.IsChecked == true;
         Settings.AutoFitColumns = AutoFitCheck.IsChecked == true;
         Settings.HideFeeRows = HideFeesCheck.IsChecked == true;
-        Settings.FontFamilyName = FontCombo.SelectedItem as string ?? "Tahoma";
-        Settings.DisplayFontSize = DisplayFontSizeCombo.SelectedItem is double displaySize ? displaySize : 11;
-        Settings.PrintFontFamilyName = PrintFontCombo.SelectedItem as string ?? "Tahoma";
-        Settings.PrintFontSize = PrintFontSizeCombo.SelectedItem is double printSize ? printSize : 8.3;
+        Settings.FontFamilyName = FontCombo.SelectedItem as string ?? Settings.FontFamilyName;
+        Settings.DisplayFontSize = DisplayFontSizeCombo.SelectedItem is double displaySize ? displaySize : Settings.DisplayFontSize;
+        Settings.PrintFontFamilyName = PrintFontCombo.SelectedItem as string ?? Settings.PrintFontFamilyName;
+        Settings.PrintFontSize = PrintFontSizeCombo.SelectedItem is double printSize ? printSize : Settings.PrintFontSize;
         Settings.RowHeightOption = RowHeightCombo.SelectedItem as string ?? "خودکار";
         DialogResult = true;
     }
