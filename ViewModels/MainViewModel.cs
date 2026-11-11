@@ -11,7 +11,7 @@ namespace BankStatementViewer.ViewModels;
 public sealed class MainViewModel : INotifyPropertyChanged
 {
     private readonly StatementParser _parser = new();
-    private readonly SettingsService _settingsService = new();
+    private readonly SettingsService _settingsService;
     private readonly DispatcherTimer _filterDebounceTimer;
     private AppSettings _settings;
     private StatementHeader? _header;
@@ -36,8 +36,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public IReadOnlyList<string> AvailableFonts => AvailableFontFamilies;
     public IReadOnlyList<string> AvailableRowHeightOptions { get; } = new[] { "خودکار", "کم", "متوسط", "زیاد" };
 
-    public MainViewModel()
+    public MainViewModel() : this(new SettingsService()) { }
+
+    public MainViewModel(SettingsService settingsService)
     {
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         _settings = _settingsService.Load(out var warning);
         Filters = _settings.LastFilters ?? new FilterSettings();
         Presets = new ObservableCollection<SearchPreset>(_settings.SearchPresets ?? new List<SearchPreset>());
