@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore
+        run: dotnet restore BankStatementViewer.sln -p:InvariantGlobalization=false
+      - name: Build
+        run: dotnet build BankStatementViewer.sln --configuration Release --no-restore -p:InvariantGlobalization=false
+      - name: Test
+        run: dotnet test tests/BankStatementViewer.Tests/BankStatementViewer.Tests.csproj --configuration Release --no-build -p:InvariantGlobalization=false
