@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="انتخاب ستون‌ها" Height="560" Width="500"
         MinHeight="420" MinWidth="420" WindowStartupLocation="CenterOwner"
-        ResizeMode="CanResize" FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="12"
+        ResizeMode="CanResize" FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="12" Background="{DynamicResource BackgroundBrush}"
         xml:lang="fa-IR">
     <Grid Margin="12">
         <Grid.RowDefinitions>
@@ -13,13 +13,13 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TextBlock x:Name="DescriptionText" Grid.Row="0" TextWrapping="Wrap" Margin="0,0,0,8"
-                   Foreground="#394B59" />
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
         <DockPanel Grid.Row="1" LastChildFill="False" Margin="0,0,0,8">
             <Button Content="انتخاب همه" Click="SelectAll_Click" Margin="0,0,6,0" Padding="10,5" />
             <Button Content="پیش‌فرض" Click="ResetDefaults_Click" Padding="10,5" />
-            <TextBlock x:Name="SelectedCountText" VerticalAlignment="Center" Margin="12,0,0,0" Foreground="#52616B" />
+            <TextBlock x:Name="SelectedCountText" VerticalAlignment="Center" Margin="12,0,0,0" Foreground="{DynamicResource TextMutedBrush}" />
         </DockPanel>
-        <Border Grid.Row="2" BorderBrush="#CBD5DC" BorderThickness="1" CornerRadius="4" Padding="8">
+        <Border Grid.Row="2" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1" CornerRadius="4" Padding="8">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <ItemsControl ItemsSource="{Binding Options}">
                     <ItemsControl.ItemsPanel>

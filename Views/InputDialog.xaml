@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="افزودن پیش‌فرض جستجو" Height="240" Width="430"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="12"
+        FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="12" Background="{DynamicResource BackgroundBrush}"
         xml:lang="fa-IR">
     <Grid Margin="16">
         <Grid.RowDefinitions>

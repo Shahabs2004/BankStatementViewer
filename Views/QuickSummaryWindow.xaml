@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="خلاصه سریع گردش حساب" Height="760" Width="1100" MinHeight="600" MinWidth="850"
-        WindowStartupLocation="CenterOwner" FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="12"
+        WindowStartupLocation="CenterOwner" FlowDirection="RightToLeft" FontFamily="Tahoma" FontSize="12" Background="{DynamicResource BackgroundBrush}"
         xml:lang="fa-IR">
     <Grid Margin="12">
         <Grid.RowDefinitions>

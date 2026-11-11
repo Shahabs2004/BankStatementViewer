@@ -5,29 +5,14 @@
         Title="نمایش‌دهنده و فیلتر گردش حساب بانکی" Height="800" Width="1300" WindowState="Maximized"
         MinHeight="550" MinWidth="800" WindowStartupLocation="CenterScreen"
         FlowDirection="RightToLeft" FontFamily="{Binding FontFamilyName}" FontSize="{Binding DisplayFontSize}"
+        Background="{DynamicResource BackgroundBrush}"
         Loaded="MainWindow_Loaded"
         xml:lang="fa-IR">
     <Window.Resources>
-        <!-- Compact icon-only toolbar buttons; Persian hints are shown through ToolTip. -->
-        <Style x:Key="IconButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="36" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="Margin" Value="2" />
-            <Setter Property="Padding" Value="4" />
-            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="Foreground" Value="#29465B" />
-            <Setter Property="Background" Value="#FFFFFF" />
-            <Setter Property="BorderBrush" Value="#C9D3DC" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="ToolTipService.ShowDuration" Value="12000" />
-        </Style>
-        <!-- Filter panels stay white when inactive and become pale green when their filter is active. -->
-        <Style x:Key="FilterGroupBoxStyle" TargetType="GroupBox">
-            <Setter Property="Background" Value="#FFFFFF" />
-            <Setter Property="BorderBrush" Value="#D5DDE3" />
-            <Setter Property="BorderThickness" Value="1" />
+        <!-- Filter panels stay white when inactive and become green-tinted when their filter is active. -->
+        <Style x:Key="FilterGroupBoxStyle" TargetType="GroupBox" BasedOn="{StaticResource {x:Type GroupBox}}">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}" />
             <Setter Property="Margin" Value="0,0,0,6" />
             <Style.Triggers>
                 <MultiDataTrigger>
@@ -35,8 +20,8 @@
                         <Condition Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True" />
                         <Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="True" />
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="Background" Value="#E8F5E9" />
-                    <Setter Property="BorderBrush" Value="#81C784" />
+                    <Setter Property="Background" Value="{DynamicResource ActiveFilterBgBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource ActiveFilterBorderBrush}" />
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
@@ -50,7 +35,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border x:Name="AccountInfoPanel" Grid.Row="0" Background="#F2F5F7" BorderBrush="#D5DDE3" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,6">
+        <Border x:Name="AccountInfoPanel" Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,6">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*" />
@@ -59,37 +44,37 @@
                     <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Grid.Column="0" Margin="4">
-                    <TextBlock Text="نام صاحب حساب" Foreground="#52616B" FontSize="11" />
-                    <TextBlock Text="{Binding Header.CustomerName, TargetNullValue=—}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="4,0">
+                    <TextBlock Text="نام صاحب حساب" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding Header.CustomerName, TargetNullValue=—}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-                <StackPanel Grid.Row="0" Grid.Column="1" Margin="4">
-                    <TextBlock Text="شماره شبا" Foreground="#52616B" FontSize="11" />
-                    <TextBlock Text="{Binding Header.Iban, TargetNullValue=—}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0">
+                    <TextBlock Text="شماره شبا" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding Header.Iban, TargetNullValue=—}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-                <StackPanel Grid.Row="0" Grid.Column="2" Margin="4">
-                    <TextBlock Text="کد شعبه" Foreground="#52616B" FontSize="11" />
-                    <TextBlock Text="{Binding Header.BranchCode, TargetNullValue=—}" FontWeight="Bold" />
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="4,0">
+                    <TextBlock Text="کد شعبه" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding Header.BranchCode, TargetNullValue=—}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                 </StackPanel>
-                <StackPanel Grid.Row="0" Grid.Column="3" Margin="4">
-                    <TextBlock Text="بازه گزارش" Foreground="#52616B" FontSize="11" />
-                    <TextBlock Text="{Binding Header.ReportPeriod, TargetNullValue=—}" FontWeight="Bold" />
+                <StackPanel Grid.Row="0" Grid.Column="3" Margin="4,0">
+                    <TextBlock Text="بازه گزارش" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding Header.ReportPeriod, TargetNullValue=—}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                 </StackPanel>
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="4,8,4,0">
-                    <TextBlock Text="تاریخ دریافت" Foreground="#52616B" FontSize="11" />
-                    <TextBlock Text="{Binding Header.ReceivedDate, TargetNullValue=—}" />
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="4,10,4,0">
+                    <TextBlock Text="تاریخ دریافت" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding Header.ReceivedDate, TargetNullValue=—}" Foreground="{DynamicResource TextPrimaryBrush}" />
                 </StackPanel>
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,8,4,0">
-                    <TextBlock Text="مانده آغازین" Foreground="#52616B" FontSize="11" />
-                    <TextBlock Text="{Binding Header.OpeningBalance, StringFormat={}{0:N0}, TargetNullValue=—}" FontWeight="Bold" />
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,10,4,0">
+                    <TextBlock Text="مانده آغازین" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding Header.OpeningBalance, StringFormat={}{0:N0}, TargetNullValue=—}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                 </StackPanel>
-                <StackPanel Grid.Row="1" Grid.Column="2" Margin="4,8,4,0">
-                    <TextBlock Text="مانده پایانی" Foreground="#52616B" FontSize="11" />
-                    <TextBlock Text="{Binding Header.ClosingBalance, StringFormat={}{0:N0}, TargetNullValue=—}" FontWeight="Bold" />
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="4,10,4,0">
+                    <TextBlock Text="مانده پایانی" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding Header.ClosingBalance, StringFormat={}{0:N0}, TargetNullValue=—}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                 </StackPanel>
-                <StackPanel Grid.Row="1" Grid.Column="3" Margin="4,8,4,0">
-                    <TextBlock Text="فایل فعال" Foreground="#52616B" FontSize="11" />
-                    <TextBlock Text="{Binding CurrentFilePath, TargetNullValue=—}" TextTrimming="CharacterEllipsis" ToolTip="{Binding CurrentFilePath}" />
+                <StackPanel Grid.Row="1" Grid.Column="3" Margin="4,10,4,0">
+                    <TextBlock Text="فایل فعال" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding CurrentFilePath, TargetNullValue=—}" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" ToolTip="{Binding CurrentFilePath}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -119,7 +104,7 @@
             <ProgressBar x:Name="OperationProgressBar" Width="100" Height="10" Margin="6,0,3,0"
                          VerticalAlignment="Center" Minimum="0" Maximum="100" Visibility="Collapsed" />
             <TextBlock x:Name="OperationStatusText" Text="در حال پردازش..." VerticalAlignment="Center"
-                       Foreground="#52616B" Margin="3,0" Visibility="Collapsed" />
+                       Foreground="{DynamicResource TextMutedBrush}" Margin="3,0" Visibility="Collapsed" />
         </WrapPanel>
 
         <Grid Grid.Row="2">
@@ -231,34 +216,19 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <GridSplitter x:Name="FiltersSplitter" Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#D5DDE3" ShowsPreview="True" />
+            <GridSplitter x:Name="FiltersSplitter" Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource BorderSoftBrush}" ShowsPreview="True" />
 
             <DataGrid x:Name="TransactionsGrid" Grid.Column="2" ItemsSource="{Binding FilteredTransactions}" AutoGenerateColumns="False"
                       IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
                       CanUserSortColumns="True" CanUserResizeColumns="True" SelectionMode="Extended"
-                      SelectionUnit="FullRow" HeadersVisibility="Column" GridLinesVisibility="All"
-                      RowHeaderWidth="0" BorderBrush="#D5DDE3" BorderThickness="1"
+                      SelectionUnit="FullRow" HeadersVisibility="Column" RowHeaderWidth="0"
                       FlowDirection="RightToLeft" FontFamily="{Binding FontFamilyName}" FontSize="{Binding DisplayFontSize}" CanUserResizeRows="True"
                       EnableRowVirtualization="True" VirtualizingPanel.IsVirtualizing="True"
                       ToolTip="برای تنظیم ارتفاع یک ردیف، مرز پایین آن را با ماوس بکشید.">
                 <DataGrid.Resources>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                        <Setter Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                        <Setter Property="FontWeight" Value="Bold" />
-                        <Setter Property="Background" Value="#E8EDF1" />
-                        <Setter Property="Padding" Value="6,7" />
-                        <Setter Property="HorizontalContentAlignment" Value="Center" />
-                    </Style>
                     <Style TargetType="{x:Type TextBlock}">
                         <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
                         <Setter Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
-                    </Style>
-                    <Style TargetType="DataGridCell">
-                        <Setter Property="FontFamily" Value="{Binding FontFamily, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                        <Setter Property="FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                        <Setter Property="Padding" Value="4,3" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
                     </Style>
                 </DataGrid.Resources>
                 <DataGrid.Columns>
@@ -325,11 +295,13 @@
             </DataGrid>
         </Grid>
 
-        <DockPanel Grid.Row="3" Margin="0,6,0,0" LastChildFill="True">
-            <TextBlock DockPanel.Dock="Right" Text="{Binding SummaryText}" FontWeight="Bold" VerticalAlignment="Center" Margin="4" />
-            <Button DockPanel.Dock="Left" Style="{StaticResource IconButtonStyle}" Content="&#xE946;" Click="About_Click"
-                    ToolTip="نمایش اطلاعات و نسخه برنامه" AutomationProperties.Name="درباره برنامه" VerticalAlignment="Center" />
-            <TextBlock Text="{Binding SettingsStatus}" Foreground="#52616B" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="8,4" />
-        </DockPanel>
+        <Border Grid.Row="3" BorderBrush="{DynamicResource BorderSoftBrush}" BorderThickness="0,1,0,0" Margin="0,8,0,0" Padding="0,6,0,0">
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Right" Text="{Binding SummaryText}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="4" />
+                <Button DockPanel.Dock="Left" Style="{StaticResource IconButtonStyle}" Content="&#xE946;" Click="About_Click"
+                        ToolTip="نمایش اطلاعات و نسخه برنامه" AutomationProperties.Name="درباره برنامه" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding SettingsStatus}" Foreground="{DynamicResource TextMutedBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="8,4" />
+            </DockPanel>
+        </Border>
     </Grid>
 </Window>
