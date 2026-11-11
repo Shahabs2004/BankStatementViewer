@@ -28,11 +28,28 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private int _filterUpdateDepth;
     private IReadOnlyList<StatementTransaction> _matchedTransactions = Array.Empty<StatementTransaction>();
 
-    public static IReadOnlyList<string> AvailableFontFamilies { get; } = new[]
+    public static IReadOnlyList<string> AvailableFontFamilies { get; } = CreateAvailableFontFamilies();
+
+    private static IReadOnlyList<string> CreateAvailableFontFamilies()
     {
-        "Tahoma", "Segoe UI", "Arial", "Calibri", "Verdana", "Microsoft Sans Serif",
-        "B Nazanin", "B Mitra", "B Yekan", "Vazirmatn"
-    };
+        var preferred = new[]
+        {
+            "Tahoma", "Segoe UI", "Arial", "Calibri", "Verdana", "Microsoft Sans Serif",
+            "B Nazanin", "B Mitra", "B Yekan", "Vazirmatn"
+        };
+        try
+        {
+            var installed = System.Windows.Media.Fonts.SystemFontFamilies
+                .SelectMany(f => new[] { f.Source, f.FamilyNames.Values.FirstOrDefault() ?? string.Empty })
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var available = preferred.Where(name => installed.Contains(name)).ToArray();
+            return available.Length > 0 ? available : new[] { "Tahoma" };
+        }
+        catch
+        {
+            return new[] { "Tahoma" };
+        }
+    }
     public IReadOnlyList<string> AvailableFonts => AvailableFontFamilies;
     public IReadOnlyList<string> AvailableRowHeightOptions { get; } = new[] { "خودکار", "کم", "متوسط", "زیاد" };
 
