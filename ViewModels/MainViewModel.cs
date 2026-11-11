@@ -176,26 +176,33 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _settings.PrintBranchCode = settings.PrintBranchCode?.Trim() ?? string.Empty;
         _settings.ShowVerticalGridLines = settings.ShowVerticalGridLines;
         _settings.ShowHorizontalGridLines = settings.ShowHorizontalGridLines;
-        _settings.FontFamilyName = AvailableFontFamilies.Contains(settings.FontFamilyName) ? settings.FontFamilyName : "Tahoma";
-        _settings.DisplayFontSize = Math.Clamp(settings.DisplayFontSize, 9, 18);
+        _fontFamilyName = AvailableFontFamilies.Contains(settings.FontFamilyName) ? settings.FontFamilyName : "Tahoma";
+        _displayFontSize = Math.Clamp(settings.DisplayFontSize, 9, 18);
+        _autoFitColumns = settings.AutoFitColumns;
+        _hideFeeRows = settings.HideFeeRows;
+        _rowHeightOption = AvailableRowHeightOptions.Contains(settings.RowHeightOption) ? settings.RowHeightOption : "خودکار";
+
+        _settings.FontFamilyName = _fontFamilyName;
+        _settings.DisplayFontSize = _displayFontSize;
         _settings.PrintFontFamilyName = AvailableFontFamilies.Contains(settings.PrintFontFamilyName) ? settings.PrintFontFamilyName : "Tahoma";
         _settings.PrintFontSize = Math.Clamp(settings.PrintFontSize, 7, 14);
-        _settings.AutoFitColumns = settings.AutoFitColumns;
-        _settings.HideFeeRows = settings.HideFeeRows;
-        _settings.RowHeightOption = AvailableRowHeightOptions.Contains(settings.RowHeightOption) ? settings.RowHeightOption : "خودکار";
+        _settings.AutoFitColumns = _autoFitColumns;
+        _settings.HideFeeRows = _hideFeeRows;
+        _settings.RowHeightOption = _rowHeightOption;
         if (settings.DisplayColumns is { Count: > 0 })
-            SetDisplayColumns(settings.DisplayColumns);
-        // Initialize the backing fields directly: constructor-time loading must not
-        // trigger redundant writes while the settings file is still being migrated.
-        _fontFamilyName = _settings.FontFamilyName;
-        _displayFontSize = _settings.DisplayFontSize;
-        _autoFitColumns = _settings.AutoFitColumns;
-        _hideFeeRows = _settings.HideFeeRows; _rowHeightOption = _settings.RowHeightOption;
+        {
+            _displayColumns = NormalizeDisplayColumns(settings.DisplayColumns);
+            _settings.DisplayColumns = _displayColumns.ToList();
+            OnPropertyChanged(nameof(DisplayColumns));
+        }
+
         OnPropertyChanged(nameof(FontFamilyName));
         OnPropertyChanged(nameof(DisplayFontSize));
         OnPropertyChanged(nameof(AutoFitColumns));
-        OnPropertyChanged(nameof(HideFeeRows)); OnPropertyChanged(nameof(RowHeightOption));
-        SaveSettings(); ScheduleApplyFilters();
+        OnPropertyChanged(nameof(HideFeeRows));
+        OnPropertyChanged(nameof(RowHeightOption));
+        SaveSettings();
+        ScheduleApplyFilters();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
