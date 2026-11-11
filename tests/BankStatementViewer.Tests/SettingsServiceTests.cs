@@ -40,17 +40,16 @@ public sealed class SettingsServiceTests
     public void ApplyFullSettings_UpdatesDisplayFontAndPersistsAllDisplayPreferences()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"BankStatementViewer-{Guid.NewGuid():N}");
-        var previousAppData = Environment.GetEnvironmentVariable("APPDATA");
         Exception? testException = null;
 
         try
         {
-            Environment.SetEnvironmentVariable("APPDATA", directory);
+            Directory.CreateDirectory(directory);
             var thread = new Thread(() =>
             {
                 try
                 {
-                    var vm = new BankStatementViewer.ViewModels.MainViewModel();
+                    var vm = new BankStatementViewer.ViewModels.MainViewModel(new SettingsService(directory));
                     var settings = new AppSettings
                     {
                         FontFamilyName = "B Nazanin",
@@ -92,7 +91,6 @@ public sealed class SettingsServiceTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("APPDATA", previousAppData);
             if (Directory.Exists(directory))
                 Directory.Delete(directory, recursive: true);
         }
