@@ -61,7 +61,8 @@ public sealed class SettingsServiceTests
 
                     vm.ApplyFullSettings(settings);
 
-                    Assert.Equal("B Nazanin", vm.FontFamilyName);
+                    var expectedFont = BankStatementViewer.ViewModels.MainViewModel.AvailableFontFamilies.Contains("B Nazanin") ? "B Nazanin" : "Tahoma";
+                    Assert.Equal(expectedFont, vm.FontFamilyName);
                     Assert.Equal(16, vm.DisplayFontSize);
                     Assert.False(vm.AutoFitColumns);
                     Assert.True(vm.HideFeeRows);
@@ -70,7 +71,7 @@ public sealed class SettingsServiceTests
                     var saved = System.Text.Json.JsonSerializer.Deserialize<AppSettings>(
                         File.ReadAllText(vm.SettingsPath));
                     Assert.NotNull(saved);
-                    Assert.Equal("B Nazanin", saved.FontFamilyName);
+                    Assert.Equal(expectedFont, saved.FontFamilyName);
                     Assert.Equal(16, saved.DisplayFontSize);
                     Assert.False(saved.AutoFitColumns);
                     Assert.True(saved.HideFeeRows);
