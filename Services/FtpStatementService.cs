@@ -31,7 +31,16 @@ public sealed class FtpStatementService
             if (!File.Exists(_settingsPath)) return new FtpConnectionSettings();
             return JsonSerializer.Deserialize<FtpConnectionSettings>(File.ReadAllText(_settingsPath)) ?? new FtpConnectionSettings();
         }
-        catch { return new FtpConnectionSettings(); }
+        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+        {
+            if (File.Exists(_settingsPath))
+            {
+                var backupName = Path.GetFileName(_settingsPath) + ".corrupt-" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                try { File.Move(_settingsPath, Path.Combine(Path.GetDirectoryName(_settingsPath)!, backupName)); }
+                catch { /* A failed backup must not prevent safe defaults. */ }
+            }
+            return new FtpConnectionSettings();
+        }
     }
 
     public void SaveSettings(FtpConnectionSettings settings)
