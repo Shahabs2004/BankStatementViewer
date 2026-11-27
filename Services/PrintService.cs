@@ -116,16 +116,17 @@ public sealed class PrintService
         const double footerReserve = 28;
         var innerWidth = Math.Max(100, pageWidth - 2 * margin);
         var columnWidths = ComputeColumnWidths(columns, innerWidth);
-        var rowStartY = headerY + tableHeaderHeight;
         var footerY = pageHeight - footerReserve;
-        var bodyHeight = Math.Max(100, footerY - rowStartY - 2);
+        const double subsequentHeaderY = 16;
+        var firstPageBodyHeight = Math.Max(100, footerY - headerY - tableHeaderHeight - 2);
+        var subsequentPageBodyHeight = Math.Max(100, footerY - subsequentHeaderY - tableHeaderHeight - 2);
         var fontSize = Math.Clamp(settings.PrintFontSize, 7, 14);
         var printFont = new FontFamily(string.IsNullOrWhiteSpace(settings.PrintFontFamilyName) ? "Tahoma" : settings.PrintFontFamilyName);
         var reportCode = Convert.ToHexString(RandomNumberGenerator.GetBytes(5));
 
         var measuredRows = transactions.Select(t => new MeasuredRow(t,
-            MeasureRowHeight(t, columns, columnWidths, fontSize, bodyHeight, printFont))).ToList();
-        var pages = PaginateRows(measuredRows, bodyHeight);
+            MeasureRowHeight(t, columns, columnWidths, fontSize, subsequentPageBodyHeight, printFont))).ToList();
+        var pages = PaginateRows(measuredRows, firstPageBodyHeight, subsequentPageBodyHeight);
 
         var document = new FixedDocument();
         document.DocumentPaginator.PageSize = new Size(pageWidth, pageHeight);
@@ -180,9 +181,11 @@ public sealed class PrintService
             AddAt(page, CreateTextBlock(line3, innerWidth - branchInfoWidth - 16, 16, fontSize * 0.94, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft, printFont), margin, 112);
             }
 
+            var pageHeaderY = pageIndex == 0 ? headerY : subsequentHeaderY;
+            var rowStartY = pageHeaderY + tableHeaderHeight;
             var tableHeader = CreateGridRow(columns.Select(c => c.Header).ToList(), columns, columnWidths,
                 tableHeaderHeight, fontSize, true, false, printFont);
-            AddAt(page, tableHeader, margin, headerY);
+            AddAt(page, tableHeader, margin, pageHeaderY);
 
             var currentY = rowStartY;
             foreach (var rowIndex in pages[pageIndex])
@@ -263,20 +266,22 @@ public sealed class PrintService
         return Math.Min(Math.Max(18, Math.Ceiling(measuredHeight)), maximumHeight);
     }
 
-    private static List<List<int>> PaginateRows(IReadOnlyList<MeasuredRow> rows, double bodyHeight)
+    private static List<List<int>> PaginateRows(IReadOnlyList<MeasuredRow> rows, double firstPageBodyHeight, double subsequentPageBodyHeight)
     {
         var pages = new List<List<int>>();
         var currentPage = new List<int>();
         var usedHeight = 0d;
+        var pageCapacity = firstPageBodyHeight;
 
         for (var i = 0; i < rows.Count; i++)
         {
-            var rowHeight = Math.Min(rows[i].Height, bodyHeight);
-            if (currentPage.Count > 0 && usedHeight + rowHeight > bodyHeight)
+            var rowHeight = Math.Min(rows[i].Height, subsequentPageBodyHeight);
+            if (currentPage.Count > 0 && usedHeight + rowHeight > pageCapacity)
             {
                 pages.Add(currentPage);
                 currentPage = new List<int>();
                 usedHeight = 0;
+                pageCapacity = subsequentPageBodyHeight;
             }
             currentPage.Add(i);
             usedHeight += rowHeight;
