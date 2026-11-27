@@ -5,7 +5,9 @@ using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 using BankStatementViewer.Models;
+using BankStatementViewer.Views;
 
 namespace BankStatementViewer.Services;
 
@@ -85,6 +87,8 @@ public sealed class PrintService
             throw new InvalidOperationException("ابعاد قابل چاپ از درایور چاپگر دریافت نشد.");
 
         var document = CreateDocument(header, transactions.ToList(), columns, pageWidth, pageHeight, landscape, settings);
+        var preview = new PrintPreviewWindow(document) { Owner = Application.Current?.MainWindow };
+        if (preview.ShowDialog() != true) return false;
         dialog.PrintDocument(document.DocumentPaginator, "گزارش گردش حساب بانکی");
         return true;
     }
@@ -109,6 +113,7 @@ public sealed class PrintService
         var bodyHeight = Math.Max(100, footerY - rowStartY - 2);
         var fontSize = Math.Clamp(settings.PrintFontSize, 7, 14);
         var printFont = new FontFamily(string.IsNullOrWhiteSpace(settings.PrintFontFamilyName) ? "Tahoma" : settings.PrintFontFamilyName);
+        var reportCode = Convert.ToHexString(RandomNumberGenerator.GetBytes(5));
 
         var measuredRows = transactions.Select(t => new MeasuredRow(t,
             MeasureRowHeight(t, columns, columnWidths, fontSize, bodyHeight, printFont))).ToList();
@@ -126,6 +131,8 @@ public sealed class PrintService
                 ClipToBounds = true
             };
 
+            if (pageIndex == 0)
+            {
             AddAt(page, CreateTextBlock("گزارش گردش حساب بانکی", innerWidth, 30, fontSize * 1.7, FontWeights.Bold,
                 TextAlignment.Center, FlowDirection.RightToLeft, printFont), margin, 8);
 
@@ -163,6 +170,7 @@ public sealed class PrintService
             AddAt(page, CreateTextBlock(line1, innerWidth - branchInfoWidth - 16, 16, fontSize * 0.94, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft, printFont), margin, 76);
             AddAt(page, CreateTextBlock(line2, innerWidth - branchInfoWidth - 16, 16, fontSize * 0.94, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft, printFont), margin, 94);
             AddAt(page, CreateTextBlock(line3, innerWidth - branchInfoWidth - 16, 16, fontSize * 0.94, FontWeights.Normal, TextAlignment.Right, FlowDirection.RightToLeft, printFont), margin, 112);
+            }
 
             var tableHeader = CreateGridRow(columns.Select(c => c.Header).ToList(), columns, columnWidths,
                 tableHeaderHeight, fontSize, true, false, printFont);
@@ -180,7 +188,7 @@ public sealed class PrintService
             }
 
             var footer = CreateTextBlock(
-                $"تعداد رکوردها: {transactions.Count:N0}     صفحه {pageIndex + 1:N0} از {pages.Count:N0}",
+                $"کد گزارش: {reportCode}     تعداد رکوردها: {transactions.Count:N0}     صفحه {pageIndex + 1:N0} از {pages.Count:N0}",
                 innerWidth, 18, fontSize * 0.96, FontWeights.Bold, TextAlignment.Left, FlowDirection.RightToLeft, printFont);
             AddAt(page, footer, margin, footerY);
 
