@@ -77,18 +77,26 @@ public sealed class PrintService
             // Some printer drivers only accept orientation after a printer is selected.
         }
 
-        if (dialog.ShowDialog() != true) return false;
-
-        var pageWidth = dialog.PrintableAreaWidth;
-        var pageHeight = dialog.PrintableAreaHeight;
-        if (landscape && pageWidth < pageHeight) (pageWidth, pageHeight) = (pageHeight, pageWidth);
-        if (!landscape && pageWidth > pageHeight) (pageWidth, pageHeight) = (pageHeight, pageWidth);
-        if (pageWidth <= 0 || pageHeight <= 0)
-            throw new InvalidOperationException("ابعاد قابل چاپ از درایور چاپگر دریافت نشد.");
-
-        var document = CreateDocument(header, transactions.ToList(), columns, pageWidth, pageHeight, landscape, settings);
+        // Show a preview before opening the native printer dialog. The previous
+        // order made users print or dismiss that dialog before they could preview.
+        const double pageWidth = 793.7; // A4 at 96 DPI
+        const double pageHeight = 1122.5;
+        var orientedWidth = landscape ? pageHeight : pageWidth;
+        var orientedHeight = landscape ? pageWidth : pageHeight;
+        var document = CreateDocument(header, transactions.ToList(), columns, orientedWidth, orientedHeight, landscape, settings);
         var preview = new PrintPreviewWindow(document) { Owner = Application.Current?.MainWindow };
         if (preview.ShowDialog() != true) return false;
+
+        if (dialog.ShowDialog() != true) return false;
+        // The preview uses standard A4 dimensions; fit it to the selected printer's
+        // printable area before sending it to that printer.
+        var printerWidth = dialog.PrintableAreaWidth;
+        var printerHeight = dialog.PrintableAreaHeight;
+        if (landscape && printerWidth < printerHeight) (printerWidth, printerHeight) = (printerHeight, printerWidth);
+        if (!landscape && printerWidth > printerHeight) (printerWidth, printerHeight) = (printerHeight, printerWidth);
+        if (printerWidth <= 0 || printerHeight <= 0)
+            throw new InvalidOperationException("ابعاد قابل چاپ از درایور چاپگر دریافت نشد.");
+        document = CreateDocument(header, transactions.ToList(), columns, printerWidth, printerHeight, landscape, settings);
         dialog.PrintDocument(document.DocumentPaginator, "گزارش گردش حساب بانکی");
         return true;
     }
